@@ -688,6 +688,23 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // ===== PERFORMANCE OPTIMIZATIONS =====
+        // Transient positions for smooth dragging
+        const transientState = {
+            nodePositions: {},  // { nodeId: {x, y} }
+            edgeControlPoints: {},  // { edgeKey: {x, y} }
+            renderScheduled: false
+        };
+
+        // Memoization cache
+        const cache = {
+            visibleNodes: null,
+            visibleEdges: null,
+            nodesById: null,
+            edgesByNode: null,
+            cacheKey: ''
+        };
+
         // ===== STATE MANAGEMENT =====
         const state = {
             currentTab: 'internal',
@@ -705,8 +722,18 @@
             panStart: { x: 0, y: 0 },
             connectMode: false,
             connectStart: null,
-            addNodeMode: false
+            addNodeMode: false,
+            mousePos: null
         };
+
+        // Debounced save function
+        let saveTimeout = null;
+        function debouncedSave() {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveMap();
+            }, 5000);
+        }
 
         // ===== DEFAULT MAP =====
         function getDefaultMap() {
@@ -801,6 +828,36 @@
             process: { primary: ['#e67e22', '#d35400'], secondary: ['rgba(230, 126, 34, 0.3)', 'rgba(211, 84, 0, 0.3)'] }
         };
 
+        // ===== CACHE MANAGEMENT =====
+        function invalidateCache() {
+            cache.visibleNodes = null;
+            cache.visibleEdges = null;
+            cache.nodesById = null;
+            cache.edgesByNode = null;
+            cache.cacheKey = '';
+        }
+
+        function buildNodesById() {
+            if (cache.nodesById) return cache.nodesById;
+            cache.nodesById = {};
+            state.graph.nodes.forEach(node => {
+                cache.nodesById[node.id] = node;
+            });
+            return cache.nodesById;
+        }
+
+        function buildEdgesByNode() {
+            if (cache.edgesByNode) return cache.edgesByNode;
+            cache.edgesByNode = {};
+            state.graph.edges.forEach(edge => {
+                if (!cache.edgesByNode[edge.source]) cache.edgesByNode[edge.source] = [];
+                if (!cache.edgesByNode[edge.target]) cache.edgesByNode[edge.target] = [];
+                cache.edgesByNode[edge.source].push(edge);
+                cache.edgesByNode[edge.target].push(edge);
+            });
+            return cache.edgesByNode;
+        }
+
         // ===== CANVAS RENDERING =====
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -813,6 +870,15 @@
 
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
+
+        function scheduleRender() {
+            if (transientState.renderScheduled) return;
+            transientState.renderScheduled = true;
+            requestAnimationFrame(() => {
+                transientState.renderScheduled = false;
+                render();
+            });
+        }
 
         function render() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -828,13 +894,15 @@
 
             // Draw connection preview
             if (state.connectMode && state.connectStart) {
-                const startNode = state.graph.nodes.find(n => n.id === state.connectStart);
+                const nodesById = buildNodesById();
+                const startNode = nodesById[state.connectStart];
                 if (startNode && state.mousePos) {
+                    const pos = getNodePosition(startNode);
                     ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
                     ctx.lineWidth = 2;
                     ctx.setLineDash([5, 5]);
                     ctx.beginPath();
-                    ctx.moveTo(startNode.x + state.panOffset.x, startNode.y + state.panOffset.y);
+                    ctx.moveTo(pos.x + state.panOffset.x, pos.y + state.panOffset.y);
                     ctx.lineTo(state.mousePos.x, state.mousePos.y);
                     ctx.stroke();
                     ctx.setLineDash([]);
@@ -842,9 +910,26 @@
             }
         }
 
+        function getNodePosition(node) {
+            // Use transient position if dragging, otherwise use stored position
+            if (transientState.nodePositions[node.id]) {
+                return transientState.nodePositions[node.id];
+            }
+            return { x: node.x, y: node.y };
+        }
+
+        function getEdgeControlPoint(edge) {
+            const edgeKey = `${edge.source}-${edge.target}`;
+            if (transientState.edgeControlPoints[edgeKey]) {
+                return transientState.edgeControlPoints[edgeKey];
+            }
+            return edge.controlPoint;
+        }
+
         function drawNode(node) {
-            const x = node.x + state.panOffset.x;
-            const y = node.y + state.panOffset.y;
+            const pos = getNodePosition(node);
+            const x = pos.x + state.panOffset.x;
+            const y = pos.y + state.panOffset.y;
             const radius = node.level === 'primary' ? 50 : node.level === 'secondary' ? 40 : 30;
 
             // Get colors
@@ -897,21 +982,26 @@
         }
 
         function drawEdge(edge) {
-            const sourceNode = state.graph.nodes.find(n => n.id === edge.source);
-            const targetNode = state.graph.nodes.find(n => n.id === edge.target);
+            const nodesById = buildNodesById();
+            const sourceNode = nodesById[edge.source];
+            const targetNode = nodesById[edge.target];
 
             if (!sourceNode || !targetNode) return;
 
-            const x1 = sourceNode.x + state.panOffset.x;
-            const y1 = sourceNode.y + state.panOffset.y;
-            const x2 = targetNode.x + state.panOffset.x;
-            const y2 = targetNode.y + state.panOffset.y;
+            const sourcePos = getNodePosition(sourceNode);
+            const targetPos = getNodePosition(targetNode);
+
+            const x1 = sourcePos.x + state.panOffset.x;
+            const y1 = sourcePos.y + state.panOffset.y;
+            const x2 = targetPos.x + state.panOffset.x;
+            const y2 = targetPos.y + state.panOffset.y;
 
             // Calculate control point
             let cpX, cpY;
-            if (edge.controlPoint) {
-                cpX = edge.controlPoint.x + state.panOffset.x;
-                cpY = edge.controlPoint.y + state.panOffset.y;
+            const controlPoint = getEdgeControlPoint(edge);
+            if (controlPoint) {
+                cpX = controlPoint.x + state.panOffset.x;
+                cpY = controlPoint.y + state.panOffset.y;
             } else {
                 cpX = (x1 + x2) / 2;
                 cpY = (y1 + y2) / 2 - 30;
@@ -941,7 +1031,12 @@
         }
 
         function getVisibleNodes() {
-            return state.graph.nodes.filter(node => {
+            const cacheKey = `${state.currentTab}-${state.activeFilters.join(',')}`;
+            if (cache.cacheKey === cacheKey && cache.visibleNodes) {
+                return cache.visibleNodes;
+            }
+
+            const result = state.graph.nodes.filter(node => {
                 // Tab-based visibility
                 if (state.currentTab === 'internal') {
                     if (node.visibility !== 'internal' && node.visibility !== 'both') return false;
@@ -955,10 +1050,14 @@
                 } else if (state.currentTab === 'processes') {
                     if (node.internalTag !== 'Process') {
                         // Check if it's a parent of a process node
-                        const hasProcessChild = state.graph.edges.some(e =>
-                            e.source === node.id &&
-                            state.graph.nodes.find(n => n.id === e.target && n.internalTag === 'Process')
-                        );
+                        const edgesByNode = buildEdgesByNode();
+                        const nodeEdges = edgesByNode[node.id] || [];
+                        const hasProcessChild = nodeEdges.some(e => {
+                            if (e.source !== node.id) return false;
+                            const nodesById = buildNodesById();
+                            const target = nodesById[e.target];
+                            return target && target.internalTag === 'Process';
+                        });
                         if (!hasProcessChild) return false;
                     }
                 }
@@ -979,11 +1078,22 @@
 
                 return true;
             });
+
+            cache.cacheKey = cacheKey;
+            cache.visibleNodes = result;
+            return result;
         }
 
         function getVisibleEdges(visibleNodes) {
+            if (cache.visibleEdges && cache.cacheKey) {
+                return cache.visibleEdges;
+            }
+
             const visibleIds = new Set(visibleNodes.map(n => n.id));
-            return state.graph.edges.filter(e => visibleIds.has(e.source) && visibleIds.has(e.target));
+            const result = state.graph.edges.filter(e => visibleIds.has(e.source) && visibleIds.has(e.target));
+
+            cache.visibleEdges = result;
+            return result;
         }
 
         // ===== INTERACTION HANDLERS =====
@@ -1000,26 +1110,37 @@
             // Check for edge control point
             const visibleNodes = getVisibleNodes();
             const visibleEdges = getVisibleEdges(visibleNodes);
+            const nodesById = buildNodesById();
 
             for (const edge of visibleEdges) {
-                const sourceNode = state.graph.nodes.find(n => n.id === edge.source);
-                const targetNode = state.graph.nodes.find(n => n.id === edge.target);
+                const sourceNode = nodesById[edge.source];
+                const targetNode = nodesById[edge.target];
 
                 if (!sourceNode || !targetNode) continue;
 
+                const sourcePos = getNodePosition(sourceNode);
+                const targetPos = getNodePosition(targetNode);
+
                 let cpX, cpY;
-                if (edge.controlPoint) {
-                    cpX = edge.controlPoint.x + state.panOffset.x;
-                    cpY = edge.controlPoint.y + state.panOffset.y;
+                const controlPoint = getEdgeControlPoint(edge);
+                if (controlPoint) {
+                    cpX = controlPoint.x + state.panOffset.x;
+                    cpY = controlPoint.y + state.panOffset.y;
                 } else {
-                    cpX = (sourceNode.x + targetNode.x) / 2 + state.panOffset.x;
-                    cpY = (sourceNode.y + targetNode.y) / 2 - 30 + state.panOffset.y;
+                    cpX = (sourcePos.x + targetPos.x) / 2 + state.panOffset.x;
+                    cpY = (sourcePos.y + targetPos.y) / 2 - 30 + state.panOffset.y;
                 }
 
                 const dist = Math.sqrt((x - cpX) ** 2 + (y - cpY) ** 2);
                 if (dist < 10) {
                     state.draggedEdgeControl = edge;
                     state.selectedEdge = `${edge.source}-${edge.target}`;
+                    // Initialize transient control point
+                    const edgeKey = `${edge.source}-${edge.target}`;
+                    transientState.edgeControlPoints[edgeKey] = controlPoint ? { ...controlPoint } : {
+                        x: (sourcePos.x + targetPos.x) / 2,
+                        y: (sourcePos.y + targetPos.y) / 2 - 30
+                    };
                     return;
                 }
             }
@@ -1031,6 +1152,9 @@
                 if (state.connectMode) return;
                 state.draggedNode = clickedNode;
                 state.dragStart = { x: x - state.panOffset.x, y: y - state.panOffset.y };
+                // Initialize transient position
+                const pos = getNodePosition(clickedNode);
+                transientState.nodePositions[clickedNode.id] = { x: pos.x, y: pos.y };
             } else {
                 state.isPanning = true;
                 state.panStart = { x: x - state.panOffset.x, y: y - state.panOffset.y };
@@ -1045,25 +1169,48 @@
             state.mousePos = { x, y };
 
             if (state.draggedNode) {
-                state.draggedNode.x = x - state.panOffset.x;
-                state.draggedNode.y = y - state.panOffset.y;
-                render();
+                // Update transient position
+                transientState.nodePositions[state.draggedNode.id] = {
+                    x: x - state.panOffset.x,
+                    y: y - state.panOffset.y
+                };
+                scheduleRender();
             } else if (state.draggedEdgeControl) {
-                // Update control point - keep it exactly under cursor
-                const cpX = x - state.panOffset.x;
-                const cpY = y - state.panOffset.y;
-                state.draggedEdgeControl.controlPoint = { x: cpX, y: cpY };
-                render();
+                // Update transient control point - keep it exactly under cursor
+                const edgeKey = `${state.draggedEdgeControl.source}-${state.draggedEdgeControl.target}`;
+                transientState.edgeControlPoints[edgeKey] = {
+                    x: x - state.panOffset.x,
+                    y: y - state.panOffset.y
+                };
+                scheduleRender();
             } else if (state.isPanning) {
                 state.panOffset.x = x - state.panStart.x;
                 state.panOffset.y = y - state.panStart.y;
-                render();
+                scheduleRender();
             } else if (state.connectMode || state.addNodeMode) {
-                render();
+                scheduleRender();
             }
         }
 
         function handleMouseUp(e) {
+            // Commit transient positions to main state
+            if (state.draggedNode && transientState.nodePositions[state.draggedNode.id]) {
+                const pos = transientState.nodePositions[state.draggedNode.id];
+                state.draggedNode.x = pos.x;
+                state.draggedNode.y = pos.y;
+                delete transientState.nodePositions[state.draggedNode.id];
+                debouncedSave();
+            }
+
+            if (state.draggedEdgeControl) {
+                const edgeKey = `${state.draggedEdgeControl.source}-${state.draggedEdgeControl.target}`;
+                if (transientState.edgeControlPoints[edgeKey]) {
+                    state.draggedEdgeControl.controlPoint = { ...transientState.edgeControlPoints[edgeKey] };
+                    delete transientState.edgeControlPoints[edgeKey];
+                    debouncedSave();
+                }
+            }
+
             state.draggedNode = null;
             state.draggedEdgeControl = null;
             state.isPanning = false;
@@ -1113,8 +1260,9 @@
             const visibleNodes = getVisibleNodes();
             for (let i = visibleNodes.length - 1; i >= 0; i--) {
                 const node = visibleNodes[i];
-                const nx = node.x + state.panOffset.x;
-                const ny = node.y + state.panOffset.y;
+                const pos = getNodePosition(node);
+                const nx = pos.x + state.panOffset.x;
+                const ny = pos.y + state.panOffset.y;
                 const radius = node.level === 'primary' ? 50 : node.level === 'secondary' ? 40 : 30;
                 const dist = Math.sqrt((x - nx) ** 2 + (y - ny) ** 2);
                 if (dist < radius) return node;
@@ -1124,7 +1272,8 @@
 
         function selectNode(nodeId) {
             state.selectedNode = nodeId;
-            const node = state.graph.nodes.find(n => n.id === nodeId);
+            const nodesById = buildNodesById();
+            const node = nodesById[nodeId];
             if (node) {
                 document.getElementById('nodeLabel').value = node.label;
                 document.getElementById('nodeVisibility').value = node.visibility;
@@ -1149,7 +1298,8 @@
                 y
             };
             state.graph.nodes.push(node);
-            saveMap();
+            invalidateCache();
+            debouncedSave();
             render();
             showToast('Node added');
         }
@@ -1158,7 +1308,8 @@
             const exists = state.graph.edges.some(e => e.source === sourceId && e.target === targetId);
             if (!exists) {
                 state.graph.edges.push({ source: sourceId, target: targetId, controlPoint: null });
-                saveMap();
+                invalidateCache();
+                debouncedSave();
                 render();
                 showToast('Connection added');
             }
@@ -1174,7 +1325,8 @@
                 );
                 state.selectedNode = null;
                 document.getElementById('inspector').classList.remove('open');
-                saveMap();
+                invalidateCache();
+                debouncedSave();
                 render();
                 showToast('Node deleted');
             });
@@ -1187,6 +1339,7 @@
                 tab.classList.add('active');
                 state.currentTab = tab.dataset.tab;
                 state.activeFilters = [];
+                invalidateCache();
                 updateFilters();
                 render();
             });
@@ -1220,30 +1373,45 @@
                         state.activeFilters.push(filter);
                         chip.classList.add('active');
                     }
+                    invalidateCache();
                     render();
                 });
                 container.appendChild(chip);
             });
         }
 
-        // Inspector updates
+        // Inspector updates - debounced
+        let inspectorUpdateTimeout = null;
+        function scheduleInspectorUpdate(updateFn) {
+            if (inspectorUpdateTimeout) clearTimeout(inspectorUpdateTimeout);
+            inspectorUpdateTimeout = setTimeout(() => {
+                updateFn();
+                invalidateCache();
+                debouncedSave();
+                render();
+            }, 300);
+        }
+
         document.getElementById('nodeLabel').addEventListener('input', (e) => {
             if (state.selectedNode) {
-                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                const nodesById = buildNodesById();
+                const node = nodesById[state.selectedNode];
                 if (node) {
                     node.label = e.target.value;
-                    saveMap();
                     render();
+                    scheduleInspectorUpdate(() => {});
                 }
             }
         });
 
         document.getElementById('nodeVisibility').addEventListener('change', (e) => {
             if (state.selectedNode) {
-                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                const nodesById = buildNodesById();
+                const node = nodesById[state.selectedNode];
                 if (node) {
                     node.visibility = e.target.value;
-                    saveMap();
+                    invalidateCache();
+                    debouncedSave();
                     render();
                 }
             }
@@ -1251,10 +1419,12 @@
 
         document.getElementById('nodeAvatarTag').addEventListener('change', (e) => {
             if (state.selectedNode) {
-                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                const nodesById = buildNodesById();
+                const node = nodesById[state.selectedNode];
                 if (node) {
                     node.avatarTag = e.target.value;
-                    saveMap();
+                    invalidateCache();
+                    debouncedSave();
                     render();
                 }
             }
@@ -1262,10 +1432,12 @@
 
         document.getElementById('nodeInternalTag').addEventListener('change', (e) => {
             if (state.selectedNode) {
-                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                const nodesById = buildNodesById();
+                const node = nodesById[state.selectedNode];
                 if (node) {
                     node.internalTag = e.target.value;
-                    saveMap();
+                    invalidateCache();
+                    debouncedSave();
                     render();
                 }
             }
@@ -1273,10 +1445,12 @@
 
         document.getElementById('nodeLevel').addEventListener('change', (e) => {
             if (state.selectedNode) {
-                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                const nodesById = buildNodesById();
+                const node = nodesById[state.selectedNode];
                 if (node) {
                     node.level = e.target.value;
-                    saveMap();
+                    invalidateCache();
+                    debouncedSave();
                     render();
                 }
             }
@@ -1487,7 +1661,8 @@
                         }
                     });
                 }
-                saveMap();
+                invalidateCache();
+                debouncedSave();
                 render();
                 showToast('Changes applied', 'success');
             }
@@ -1496,7 +1671,11 @@
         });
 
         // Save/Load
-        document.getElementById('saveMapBtn').addEventListener('click', saveMap);
+        document.getElementById('saveMapBtn').addEventListener('click', () => {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveMap();
+        });
+
         document.getElementById('openMapBtn').addEventListener('click', () => {
             const mapId = prompt('Enter map ID to load:', 'BLV-Ecosystem-Map');
             if (mapId) loadMap(mapId);
@@ -1537,6 +1716,7 @@
                 const data = await response.json();
                 state.graph = data.graph;
                 state.chatHistory = data.chatHistory || [];
+                invalidateCache();
                 render();
                 showToast('Map loaded', 'success');
             } catch (error) {
@@ -1546,6 +1726,7 @@
 
         function initializeDefaultMap() {
             state.graph = getDefaultMap();
+            invalidateCache();
             saveMap();
             render();
         }
