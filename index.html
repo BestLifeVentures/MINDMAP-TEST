@@ -3,375 +3,1618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLV Business Ecosystem Map</title>
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: 'default',
-            mindmap: {
-                padding: 20
-            }
-        });
-    </script>
+    <title>BLV Mind Map</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            overflow: hidden;
+            height: 100vh;
+            color: #e0e0e0;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 30px;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        .mindmap-container {
-            width: 100%;
-            overflow-x: auto;
-            margin: 20px 0;
-        }
-        .mermaid {
+
+        .app-container {
             display: flex;
-            justify-content: center;
-            min-height: 600px;
+            flex-direction: column;
+            height: 100vh;
         }
-        .legend {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 6px;
-            border-left: 4px solid #0066cc;
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .legend h2 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .legend-section {
-            margin-bottom: 15px;
-        }
-        .legend-section h3 {
-            font-size: 14px;
+
+        .header h1 {
+            font-size: 20px;
             font-weight: 600;
-            color: #555;
-            margin-bottom: 8px;
+            color: #f0f0f0;
         }
-        .legend-section ul {
-            list-style: none;
-            padding-left: 0;
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
         }
-        .legend-section li {
-            padding: 4px 0;
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 13px;
-            color: #666;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0 20px;
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #e0e0e0;
+        }
+
+        .tab.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
+        }
+
+        /* Filter chips */
+        .filters-container {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 10px 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: 48px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .filter-chip {
+            padding: 6px 12px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #aaa;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .filter-chip:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .filter-chip.active {
+            background: rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+            border-color: #d4af37;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Canvas */
+        #canvas {
+            flex: 1;
+            cursor: grab;
+        }
+
+        #canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Inspector panel */
+        .inspector {
+            width: 320px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .inspector.open {
+            transform: translateX(0);
+        }
+
+        .inspector h3 {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 53, 69, 0.3);
+        }
+
+        /* Floating controls */
+        .floating-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .floating-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .ai-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #000;
+        }
+
+        .ai-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* AI Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: flex-end;
+            justify-content: flex-start;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .ai-modal {
+            width: 450px;
+            max-height: 600px;
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(40, 40, 40, 0.95) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.8) translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.open .ai-modal {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            color: #d4af37;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #e0e0e0;
+        }
+
+        .modal-tabs {
+            display: flex;
+            padding: 12px 20px;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-tab {
+            padding: 8px 16px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: #888;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .modal-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-tab.active {
+            background: rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            max-width: 85%;
+            font-size: 14px;
             line-height: 1.5;
         }
-        .legend-section li::before {
-            content: "•";
-            color: #0066cc;
-            font-weight: bold;
+
+        .message.user {
+            background: rgba(212, 175, 55, 0.15);
+            color: #f0f0f0;
+            align-self: flex-end;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .message.assistant {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            align-self: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-input-container {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .send-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Preview panel */
+        .preview-panel {
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .preview-panel.open {
+            display: block;
+        }
+
+        .preview-content {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            padding: 12px 20px;
+            background: rgba(30, 30, 30, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(150%);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.15);
+        }
+
+        .toast.success {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.15);
+        }
+
+        /* Loading spinner */
+        .spinner {
             display: inline-block;
-            width: 1em;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #d4af37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Confirmation dialog */
+        .confirm-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            z-index: 3000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            min-width: 320px;
+        }
+
+        .confirm-dialog h4 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #f0f0f0;
+        }
+
+        .confirm-dialog p {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Best Life Ventures (BLV)</h1>
-        <div class="subtitle">Business Ecosystem Map - Internal Clarity Document</div>
-
-        <div class="mindmap-container">
-            <pre class="mermaid">
-mindmap
-  root((Best Life Ventures))
-    BLV Experiences
-      Purpose
-        Deliver high-impact in-person experiences
-        Connect people with expertise and community
-      What is offered
-        Curated events, retreats, gatherings
-        Facilitated access to experts
-        Community building opportunities
-      Who it serves
-        Individuals seeking transformation
-        People connecting with experts
-        Organizations sponsoring members
-      Why it exists
-        Face-to-face creates depth
-        Builds trust for ecosystem
-        Testing ground for digital content
-    BLV Media Agency
-      Purpose
-        Create and distribute expert content
-        Scale expertise beyond physical presence
-      What is offered
-        Content production video, audio, written
-        Distribution strategy and execution
-        Media partnerships and placement
-        Expert positioning and amplification
-      Who it serves
-        Experts and creators
-        Companies needing expert content
-        Organizations amplifying message
-      Why it exists
-        Expertise trapped in minds has limited impact
-        Content creation requires specialized skills
-        Distribution separates reach from obscurity
-    BLV Systems Software
-      Purpose
-        Build tech infrastructure
-        Enable experts to deliver at scale
-      What is offered
-        Software platforms for content delivery
-        Learning management and community tools
-        Data and analytics
-        Integration systems
-      Who it serves
-        Creators needing distribution
-        Companies needing knowledge management
-        Foundations expanding reach
-      Why it exists
-        Technology removes friction
-        Software creates leverage
-        Data enables improvement
-      Creators IP Holders
-        What they receive
-          Platform infrastructure
-          Community and commerce tools
-          Analytics and impact data
-          Connection to distribution network
-          Potential inclusion in events
-        What they contribute
-          Expert content attracting audience
-          Existing audience and reach
-          Credibility and trust
-          Platform testing and feedback
-        How they benefit
-          Reduced tech overhead
-          Enhanced monetization
-          Expanded reach
-          Professional media support
-        How BLV benefits
-          Access to diverse audiences
-          Platform validation
-          Network effects
-          Revenue sharing
-          Content for experiences
-        Relationship to Experiences
-          Creators as speakers and facilitators
-          Digital content drives attendance
-          Events deepen community
-          Experiences generate content
-        Relationship to Media
-          Media produces creator content
-          Creators as case studies
-          Agency handles distribution
-          Campaigns demonstrate value
-      Companies Internal Clients
-        What they receive
-          Custom white-labeled software
-          Employee learning systems
-          Internal expertise scaling
-          Corporate infrastructure integration
-        What they contribute
-          Stable recurring revenue
-          Enterprise feature requirements
-          Case studies and references
-          Industry network referrals
-        How they benefit
-          Centralized knowledge system
-          Reduced training vendor dependency
-          Employee retention improvement
-          Measurable learning data
-        How BLV benefits
-          Predictable revenue stream
-          Sophisticated user feedback
-          Higher lifetime value
-          Reduced acquisition cost
-        Relationship to Experiences
-          Companies sponsor employees
-          Corporate events powered by BLV
-          Executives become software clients
-          High-end lead generation
-        Relationship to Media
-          Companies hire for thought leadership
-          Internal experts go external
-          Training content creation
-          Internal strategies expand external
-      Foundations Nonprofits
-        What they receive
-          Reduced-cost or donated access
-          Mission scaling platform
-          Tools to serve beneficiaries
-          Connection to experts
-        What they contribute
-          Mission alignment
-          Impact stories and data
-          Access to underserved communities
-          Goodwill and reputation
-        How they benefit
-          Technology otherwise unaffordable
-          Expanded mission capacity
-          Increased credibility
-          Networking opportunities
-        How BLV benefits
-          Social responsibility fulfillment
-          Diverse use cases
-          Authentic community relationships
-          Talent pipeline
-        Relationship to Experiences
-          Leaders attend experiences
-          Sponsored beneficiary attendance
-          Mission-aligned events
-          Awareness among corporates
-        Relationship to Media
-          Stories of foundation impact
-          Mission-aligned audience
-          Pro-bono services
-          CSR case studies
-    Distribution Channels
-      How Creators Function as Distribution
-        Traditional software model
-          Company builds product
-          Company acquires customers
-          Company responsible for growth
-        BLV Systems model
-          Creators bring existing audiences
-          Each creator is distribution channel
-          Platform provides infrastructure
-        Why this matters
-          Shared customer acquisition cost
-          Growth scales with creators
-          Trust transfer through creators
-          Network effects accelerate
-        Creator incentive alignment
-          Need tech but don't want to build
-          Focus on content not infrastructure
-          Revenue sharing aligns success
-          Platform improvements benefit business
-        Not traditional customers
-          Contribute equal value to what received
-          Partnership not vendor-client
-          Their success required for BLV success
-          Actively promote platform
-        Distinction from others
-          Companies are customers paying for use
-          Nonprofits are subsidized beneficiaries
-          Creators are partners bringing distribution
-    Value Moat
-      Not Replaceable by Software Alone
-        Software without content is empty
-        Technology commoditizes quickly
-        Platforms need creators
-        Integration creates sticky ecosystem
-        Can't replicate human connection
-      Not Replaceable by Events Alone
-        Events high-touch but low-scale
-        Can't capture ongoing digital relationship
-        Can't generate recurring revenue at scale
-        Limited to in-person attendees
-        Events enable digital relationships
-      Not Replaceable by Agencies Alone
-        Agencies don't control platforms
-        Model doesn't scale
-        No direct audience relationship
-        Client dependency creates fragility
-        BLV owns where content lives
-      Not Replaceable by Creators Alone
-        Individual creators lack infrastructure
-        Creator businesses are fragile
-        Struggle with tech and operations
-        No individual has BLV's breadth
-        BLV ecosystem makes creators successful
-      The Integration Is the Moat
-        Experiences build trust
-        Media scales expertise
-        Systems provide infrastructure
-        Components feed each other
-        Network effects compound
-        Switching costs increase
-        Content libraries build
-        Community relationships deepen
-        Integration creates lock-in
-      What Competitors Need to Replicate
-        Software engineering team
-        Content production capabilities
-        Event production expertise
-        Relationships with creators
-        Trust across all channels
-        Years of content and data
-        Integrated business model
-        Cultural understanding
-        Long-term investment willingness
-      Why This Model Sustains
-        Independent value multiplied together
-        Diversified revenue streams
-        Risk distribution across components
-        Extended customer lifetime value
-        Brand strengthens across touchpoints
-        Attracts mission-driven talent
-            </pre>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>BLV Mind Map</h1>
+            <div class="header-controls">
+                <button class="btn btn-secondary" id="openMapBtn">Open</button>
+                <button class="btn btn-primary" id="saveMapBtn">Save</button>
+            </div>
         </div>
 
-        <div class="legend">
-            <h2>Ecosystem Key Concepts</h2>
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <button class="tab active" data-tab="internal">Internal</button>
+            <button class="tab" data-tab="external">External</button>
+            <button class="tab" data-tab="people">People</button>
+            <button class="tab" data-tab="processes">Processes</button>
+        </div>
 
-            <div class="legend-section">
-                <h3>Three Core Divisions</h3>
-                <ul>
-                    <li><strong>BLV Experiences:</strong> In-person events that build trust and relationships</li>
-                    <li><strong>BLV Media:</strong> Content production and distribution agency</li>
-                    <li><strong>BLV Systems:</strong> Software infrastructure enabling scale</li>
-                </ul>
+        <!-- Filters -->
+        <div class="filters-container" id="filtersContainer">
+            <span class="filter-label">Filters:</span>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <canvas id="canvas"></canvas>
+
+            <!-- Inspector panel -->
+            <div class="inspector" id="inspector">
+                <h3>Node Properties</h3>
+                <div class="form-group">
+                    <label>Label</label>
+                    <input type="text" id="nodeLabel" placeholder="Node label">
+                </div>
+                <div class="form-group">
+                    <label>Visibility</label>
+                    <select id="nodeVisibility">
+                        <option value="internal">Internal</option>
+                        <option value="external">External</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Avatar Tag</label>
+                    <select id="nodeAvatarTag">
+                        <option value="BLV">BLV</option>
+                        <option value="Creators">Creators</option>
+                        <option value="Companies">Companies</option>
+                        <option value="Foundations">Foundations</option>
+                        <option value="Consumers">Consumers</option>
+                        <option value="Experts">Experts</option>
+                        <option value="Distribution Channels">Distribution Channels</option>
+                        <option value="Miles">Miles</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Internal Tag</label>
+                    <select id="nodeInternalTag">
+                        <option value="Brand">Brand</option>
+                        <option value="Dreamworks">Dreamworks</option>
+                        <option value="Media">Media</option>
+                        <option value="Offer">Offer</option>
+                        <option value="Process">Process</option>
+                        <option value="People">People</option>
+                        <option value="Distribution">Distribution</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Level</label>
+                    <select id="nodeLevel">
+                        <option value="primary">Primary</option>
+                        <option value="secondary">Secondary</option>
+                        <option value="detail">Detail</option>
+                    </select>
+                </div>
+                <button class="btn btn-danger" id="deleteNodeBtn">Delete Node</button>
             </div>
 
-            <div class="legend-section">
-                <h3>BLV Systems Segments</h3>
-                <ul>
-                    <li><strong>Creators/IP Holders:</strong> Partners bringing distribution in exchange for infrastructure</li>
-                    <li><strong>Companies:</strong> Internal clients paying for knowledge management systems</li>
-                    <li><strong>Foundations/Nonprofits:</strong> Beneficiaries receiving subsidized or donated access</li>
-                </ul>
-            </div>
-
-            <div class="legend-section">
-                <h3>Distribution Model</h3>
-                <ul>
-                    <li>Creators function as distribution channels, not traditional customers</li>
-                    <li>Each creator brings their existing audience to the platform</li>
-                    <li>Trust transfers from creator to platform</li>
-                    <li>Network effects compound as creators cross-pollinate audiences</li>
-                </ul>
-            </div>
-
-            <div class="legend-section">
-                <h3>Value Moat</h3>
-                <ul>
-                    <li>Integration of experiences, media, and systems creates non-replicable ecosystem</li>
-                    <li>Each component feeds and strengthens the others</li>
-                    <li>Cannot be replicated by software, events, agencies, or creators alone</li>
-                    <li>Switching costs increase over time through content, community, and data</li>
-                </ul>
+            <!-- Floating controls -->
+            <div class="floating-controls">
+                <button class="floating-btn ai-btn" id="aiBtn" title="AI Copilot">✨</button>
+                <button class="floating-btn control-btn" id="addNodeBtn" title="Add Node">+</button>
+                <button class="floating-btn control-btn" id="addEdgeBtn" title="Add Connection">→</button>
             </div>
         </div>
     </div>
+
+    <!-- AI Modal -->
+    <div class="modal-overlay" id="aiModal">
+        <div class="ai-modal">
+            <div class="modal-header">
+                <h3><span>✨</span> BLV Copilot</h3>
+                <button class="close-btn" id="closeAiBtn">×</button>
+            </div>
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-mode="chat">Chat</button>
+                <button class="modal-tab" data-mode="generate">Generate</button>
+                <button class="modal-tab" data-mode="update">Update Selection</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="preview-panel" id="previewPanel">
+                <div class="preview-content" id="previewContent"></div>
+                <div class="preview-actions">
+                    <button class="btn btn-secondary" id="cancelPreviewBtn">Cancel</button>
+                    <button class="btn btn-primary" id="applyPreviewBtn">Apply</button>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask anything...">
+                <button class="send-btn" id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== STATE MANAGEMENT =====
+        const state = {
+            currentTab: 'internal',
+            currentMode: 'chat',
+            activeFilters: [],
+            selectedNode: null,
+            selectedEdge: null,
+            graph: { nodes: [], edges: [] },
+            chatHistory: [],
+            preview: null,
+            draggedNode: null,
+            draggedEdgeControl: null,
+            panOffset: { x: 0, y: 0 },
+            isPanning: false,
+            panStart: { x: 0, y: 0 },
+            connectMode: false,
+            connectStart: null,
+            addNodeMode: false
+        };
+
+        // ===== DEFAULT MAP =====
+        function getDefaultMap() {
+            const nodes = [
+                // Root
+                { id: 'blv_root', label: 'BLV', level: 'primary', visibility: 'both', avatarTag: 'BLV', internalTag: 'Brand', colorGroup: 'blv', x: 400, y: 100 },
+
+                // Three internal aspects
+                { id: 'blv_brand', label: 'BLV Brand', level: 'primary', visibility: 'both', avatarTag: 'BLV', internalTag: 'Brand', colorGroup: 'brand', x: 200, y: 250 },
+                { id: 'blv_dreamworks', label: 'BLV Dreamworks', level: 'primary', visibility: 'both', avatarTag: 'BLV', internalTag: 'Dreamworks', colorGroup: 'dreamworks', x: 400, y: 250 },
+                { id: 'blv_media', label: 'BLV Media', level: 'primary', visibility: 'both', avatarTag: 'BLV', internalTag: 'Media', colorGroup: 'media', x: 600, y: 250 },
+
+                // External-facing offers
+                { id: 'offers_experiences', label: 'BLV Experiences', level: 'secondary', visibility: 'external', avatarTag: 'Consumers', internalTag: 'Offer', colorGroup: 'brand', x: 200, y: 400 },
+                { id: 'offers_software', label: 'Applied Systems & Tools', level: 'secondary', visibility: 'external', avatarTag: 'BLV', internalTag: 'Offer', colorGroup: 'dreamworks', x: 400, y: 400 },
+                { id: 'offers_media', label: 'Content & Distribution', level: 'secondary', visibility: 'external', avatarTag: 'BLV', internalTag: 'Offer', colorGroup: 'media', x: 600, y: 400 },
+
+                // Avatars/Groups
+                { id: 'avatar_consumers', label: 'Consumers', level: 'secondary', visibility: 'both', avatarTag: 'Consumers', internalTag: 'People', colorGroup: 'people', x: 800, y: 200 },
+                { id: 'avatar_creators', label: 'Creators', level: 'secondary', visibility: 'both', avatarTag: 'Creators', internalTag: 'People', colorGroup: 'people', x: 800, y: 280 },
+                { id: 'avatar_companies', label: 'Companies', level: 'secondary', visibility: 'both', avatarTag: 'Companies', internalTag: 'People', colorGroup: 'people', x: 800, y: 360 },
+                { id: 'avatar_foundations', label: 'Foundations', level: 'secondary', visibility: 'both', avatarTag: 'Foundations', internalTag: 'People', colorGroup: 'people', x: 800, y: 440 },
+                { id: 'avatar_experts', label: 'Experts', level: 'secondary', visibility: 'both', avatarTag: 'Experts', internalTag: 'People', colorGroup: 'people', x: 800, y: 520 },
+                { id: 'avatar_distribution', label: 'Distribution Channels', level: 'secondary', visibility: 'both', avatarTag: 'Distribution Channels', internalTag: 'Distribution', colorGroup: 'people', x: 800, y: 600 },
+                { id: 'avatar_miles', label: 'Miles (Personal Brand)', level: 'secondary', visibility: 'both', avatarTag: 'Miles', internalTag: 'People', colorGroup: 'people', x: 800, y: 680 },
+
+                // People/Execution helpers
+                { id: 'people_devteam', label: 'Dev Team (subcontracted)', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'People', colorGroup: 'people', x: 100, y: 550 },
+                { id: 'people_mediateam', label: 'Media Team (subcontracted)', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'People', colorGroup: 'people', x: 100, y: 620 },
+                { id: 'people_contractors', label: 'Contractors', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'People', colorGroup: 'people', x: 100, y: 690 },
+                { id: 'people_tools', label: 'Tools', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'People', colorGroup: 'people', x: 100, y: 760 },
+
+                // Processes
+                { id: 'proc_experiences', label: 'Experience Creation', level: 'secondary', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Process', colorGroup: 'process', x: 250, y: 550 },
+                { id: 'proc_content', label: 'Show / Content Creation', level: 'secondary', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Process', colorGroup: 'process', x: 350, y: 550 },
+                { id: 'proc_software', label: 'Software Development', level: 'secondary', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Process', colorGroup: 'process', x: 450, y: 550 },
+                { id: 'proc_creator_engage', label: 'Creator Engagement', level: 'secondary', visibility: 'internal', avatarTag: 'Creators', internalTag: 'Process', colorGroup: 'process', x: 550, y: 550 },
+                { id: 'proc_business_engage', label: 'Business Engagement', level: 'secondary', visibility: 'internal', avatarTag: 'Companies', internalTag: 'Process', colorGroup: 'process', x: 650, y: 550 },
+                { id: 'proc_foundation_programs', label: 'Foundation Programs', level: 'secondary', visibility: 'internal', avatarTag: 'Foundations', internalTag: 'Process', colorGroup: 'process', x: 750, y: 550 }
+            ];
+
+            const edges = [
+                // Root to aspects
+                { source: 'blv_root', target: 'blv_brand', controlPoint: null },
+                { source: 'blv_root', target: 'blv_dreamworks', controlPoint: null },
+                { source: 'blv_root', target: 'blv_media', controlPoint: null },
+
+                // Aspects to offers
+                { source: 'blv_brand', target: 'offers_experiences', controlPoint: null },
+                { source: 'blv_dreamworks', target: 'offers_software', controlPoint: null },
+                { source: 'blv_media', target: 'offers_media', controlPoint: null },
+
+                // Avatars
+                { source: 'offers_experiences', target: 'avatar_consumers', controlPoint: null },
+                { source: 'blv_dreamworks', target: 'avatar_creators', controlPoint: null },
+                { source: 'blv_dreamworks', target: 'avatar_companies', controlPoint: null },
+                { source: 'blv_dreamworks', target: 'avatar_foundations', controlPoint: null },
+                { source: 'blv_media', target: 'avatar_creators', controlPoint: null },
+                { source: 'blv_media', target: 'avatar_companies', controlPoint: null },
+                { source: 'blv_media', target: 'avatar_foundations', controlPoint: null },
+                { source: 'blv_brand', target: 'avatar_experts', controlPoint: null },
+                { source: 'blv_media', target: 'avatar_experts', controlPoint: null },
+                { source: 'blv_dreamworks', target: 'avatar_experts', controlPoint: null },
+                { source: 'blv_root', target: 'avatar_distribution', controlPoint: null },
+                { source: 'blv_root', target: 'avatar_miles', controlPoint: null },
+
+                // People
+                { source: 'blv_dreamworks', target: 'people_devteam', controlPoint: null },
+                { source: 'blv_media', target: 'people_mediateam', controlPoint: null },
+                { source: 'blv_root', target: 'people_contractors', controlPoint: null },
+                { source: 'blv_root', target: 'people_tools', controlPoint: null },
+
+                // Processes
+                { source: 'blv_brand', target: 'proc_experiences', controlPoint: null },
+                { source: 'blv_media', target: 'proc_content', controlPoint: null },
+                { source: 'blv_dreamworks', target: 'proc_software', controlPoint: null },
+                { source: 'avatar_creators', target: 'proc_creator_engage', controlPoint: null },
+                { source: 'avatar_companies', target: 'proc_business_engage', controlPoint: null },
+                { source: 'avatar_foundations', target: 'proc_foundation_programs', controlPoint: null }
+            ];
+
+            return { nodes, edges };
+        }
+
+        // ===== COLOR SCHEMES =====
+        const colorSchemes = {
+            blv: { primary: ['#d4af37', '#f4d03f'], secondary: ['rgba(212, 175, 55, 0.3)', 'rgba(244, 208, 63, 0.3)'] },
+            brand: { primary: ['#2ecc71', '#27ae60'], secondary: ['rgba(46, 204, 113, 0.3)', 'rgba(39, 174, 96, 0.3)'] },
+            dreamworks: { primary: ['#8e44ad', '#9b59b6'], secondary: ['rgba(142, 68, 173, 0.3)', 'rgba(155, 89, 182, 0.3)'] },
+            media: { primary: ['#3498db', '#2980b9'], secondary: ['rgba(52, 152, 219, 0.3)', 'rgba(41, 128, 185, 0.3)'] },
+            people: { primary: ['#1abc9c', '#16a085'], secondary: ['rgba(26, 188, 156, 0.3)', 'rgba(22, 160, 133, 0.3)'] },
+            process: { primary: ['#e67e22', '#d35400'], secondary: ['rgba(230, 126, 34, 0.3)', 'rgba(211, 84, 0, 0.3)'] }
+        };
+
+        // ===== CANVAS RENDERING =====
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            render();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const visibleNodes = getVisibleNodes();
+            const visibleEdges = getVisibleEdges(visibleNodes);
+
+            // Draw edges
+            visibleEdges.forEach(edge => drawEdge(edge));
+
+            // Draw nodes
+            visibleNodes.forEach(node => drawNode(node));
+
+            // Draw connection preview
+            if (state.connectMode && state.connectStart) {
+                const startNode = state.graph.nodes.find(n => n.id === state.connectStart);
+                if (startNode && state.mousePos) {
+                    ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(startNode.x + state.panOffset.x, startNode.y + state.panOffset.y);
+                    ctx.lineTo(state.mousePos.x, state.mousePos.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+        }
+
+        function drawNode(node) {
+            const x = node.x + state.panOffset.x;
+            const y = node.y + state.panOffset.y;
+            const radius = node.level === 'primary' ? 50 : node.level === 'secondary' ? 40 : 30;
+
+            // Get colors
+            const scheme = colorSchemes[node.colorGroup] || colorSchemes.blv;
+            const colors = node.level === 'primary' ? scheme.primary : scheme.secondary;
+
+            // Draw node circle with gradient
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            gradient.addColorStop(0, colors[0]);
+            gradient.addColorStop(1, colors[1]);
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw border if selected
+            if (state.selectedNode === node.id) {
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+            // Draw label
+            ctx.fillStyle = '#ffffff';
+            ctx.font = node.level === 'primary' ? 'bold 14px sans-serif' : '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const words = node.label.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > radius * 1.6) {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+
+            lines.forEach((line, i) => {
+                const lineY = y + (i - (lines.length - 1) / 2) * 16;
+                ctx.fillText(line, x, lineY);
+            });
+        }
+
+        function drawEdge(edge) {
+            const sourceNode = state.graph.nodes.find(n => n.id === edge.source);
+            const targetNode = state.graph.nodes.find(n => n.id === edge.target);
+
+            if (!sourceNode || !targetNode) return;
+
+            const x1 = sourceNode.x + state.panOffset.x;
+            const y1 = sourceNode.y + state.panOffset.y;
+            const x2 = targetNode.x + state.panOffset.x;
+            const y2 = targetNode.y + state.panOffset.y;
+
+            // Calculate control point
+            let cpX, cpY;
+            if (edge.controlPoint) {
+                cpX = edge.controlPoint.x + state.panOffset.x;
+                cpY = edge.controlPoint.y + state.panOffset.y;
+            } else {
+                cpX = (x1 + x2) / 2;
+                cpY = (y1 + y2) / 2 - 30;
+            }
+
+            // Draw curve
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+            ctx.shadowBlur = 4;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.quadraticCurveTo(cpX, cpY, x2, y2);
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+
+            // Draw control point if edge is selected
+            const edgeKey = `${edge.source}-${edge.target}`;
+            if (state.selectedEdge === edgeKey) {
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath();
+                ctx.arc(cpX, cpY, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function getVisibleNodes() {
+            return state.graph.nodes.filter(node => {
+                // Tab-based visibility
+                if (state.currentTab === 'internal') {
+                    if (node.visibility !== 'internal' && node.visibility !== 'both') return false;
+                } else if (state.currentTab === 'external') {
+                    if (node.visibility !== 'external' && node.visibility !== 'both') return false;
+                } else if (state.currentTab === 'people') {
+                    if (node.internalTag !== 'People' &&
+                        !['Miles', 'Experts', 'Distribution Channels'].includes(node.avatarTag)) {
+                        return false;
+                    }
+                } else if (state.currentTab === 'processes') {
+                    if (node.internalTag !== 'Process') {
+                        // Check if it's a parent of a process node
+                        const hasProcessChild = state.graph.edges.some(e =>
+                            e.source === node.id &&
+                            state.graph.nodes.find(n => n.id === e.target && n.internalTag === 'Process')
+                        );
+                        if (!hasProcessChild) return false;
+                    }
+                }
+
+                // Filter-based visibility
+                if (state.activeFilters.length > 0) {
+                    if (state.currentTab === 'internal') {
+                        return state.activeFilters.includes(node.internalTag);
+                    } else if (state.currentTab === 'external') {
+                        return state.activeFilters.includes(node.avatarTag);
+                    } else if (state.currentTab === 'people') {
+                        return state.activeFilters.includes(node.avatarTag) ||
+                               (state.activeFilters.includes('People') && node.internalTag === 'People');
+                    } else if (state.currentTab === 'processes') {
+                        return state.activeFilters.includes(node.avatarTag) || node.internalTag === 'Process';
+                    }
+                }
+
+                return true;
+            });
+        }
+
+        function getVisibleEdges(visibleNodes) {
+            const visibleIds = new Set(visibleNodes.map(n => n.id));
+            return state.graph.edges.filter(e => visibleIds.has(e.source) && visibleIds.has(e.target));
+        }
+
+        // ===== INTERACTION HANDLERS =====
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('click', handleClick);
+
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check for edge control point
+            const visibleNodes = getVisibleNodes();
+            const visibleEdges = getVisibleEdges(visibleNodes);
+
+            for (const edge of visibleEdges) {
+                const sourceNode = state.graph.nodes.find(n => n.id === edge.source);
+                const targetNode = state.graph.nodes.find(n => n.id === edge.target);
+
+                if (!sourceNode || !targetNode) continue;
+
+                let cpX, cpY;
+                if (edge.controlPoint) {
+                    cpX = edge.controlPoint.x + state.panOffset.x;
+                    cpY = edge.controlPoint.y + state.panOffset.y;
+                } else {
+                    cpX = (sourceNode.x + targetNode.x) / 2 + state.panOffset.x;
+                    cpY = (sourceNode.y + targetNode.y) / 2 - 30 + state.panOffset.y;
+                }
+
+                const dist = Math.sqrt((x - cpX) ** 2 + (y - cpY) ** 2);
+                if (dist < 10) {
+                    state.draggedEdgeControl = edge;
+                    state.selectedEdge = `${edge.source}-${edge.target}`;
+                    return;
+                }
+            }
+
+            // Check for node
+            const clickedNode = getNodeAtPosition(x, y);
+            if (clickedNode) {
+                if (state.addNodeMode) return;
+                if (state.connectMode) return;
+                state.draggedNode = clickedNode;
+                state.dragStart = { x: x - state.panOffset.x, y: y - state.panOffset.y };
+            } else {
+                state.isPanning = true;
+                state.panStart = { x: x - state.panOffset.x, y: y - state.panOffset.y };
+            }
+        }
+
+        function handleMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            state.mousePos = { x, y };
+
+            if (state.draggedNode) {
+                state.draggedNode.x = x - state.panOffset.x;
+                state.draggedNode.y = y - state.panOffset.y;
+                render();
+            } else if (state.draggedEdgeControl) {
+                // Update control point - keep it exactly under cursor
+                const cpX = x - state.panOffset.x;
+                const cpY = y - state.panOffset.y;
+                state.draggedEdgeControl.controlPoint = { x: cpX, y: cpY };
+                render();
+            } else if (state.isPanning) {
+                state.panOffset.x = x - state.panStart.x;
+                state.panOffset.y = y - state.panStart.y;
+                render();
+            } else if (state.connectMode || state.addNodeMode) {
+                render();
+            }
+        }
+
+        function handleMouseUp(e) {
+            state.draggedNode = null;
+            state.draggedEdgeControl = null;
+            state.isPanning = false;
+        }
+
+        function handleClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (state.addNodeMode) {
+                addNode(x - state.panOffset.x, y - state.panOffset.y);
+                state.addNodeMode = false;
+                canvas.style.cursor = 'grab';
+                return;
+            }
+
+            if (state.connectMode) {
+                const clickedNode = getNodeAtPosition(x, y);
+                if (clickedNode) {
+                    if (!state.connectStart) {
+                        state.connectStart = clickedNode.id;
+                    } else {
+                        if (state.connectStart !== clickedNode.id) {
+                            addEdge(state.connectStart, clickedNode.id);
+                        }
+                        state.connectMode = false;
+                        state.connectStart = null;
+                        canvas.style.cursor = 'grab';
+                    }
+                }
+                return;
+            }
+
+            const clickedNode = getNodeAtPosition(x, y);
+            if (clickedNode) {
+                selectNode(clickedNode.id);
+            } else {
+                state.selectedNode = null;
+                state.selectedEdge = null;
+                document.getElementById('inspector').classList.remove('open');
+            }
+            render();
+        }
+
+        function getNodeAtPosition(x, y) {
+            const visibleNodes = getVisibleNodes();
+            for (let i = visibleNodes.length - 1; i >= 0; i--) {
+                const node = visibleNodes[i];
+                const nx = node.x + state.panOffset.x;
+                const ny = node.y + state.panOffset.y;
+                const radius = node.level === 'primary' ? 50 : node.level === 'secondary' ? 40 : 30;
+                const dist = Math.sqrt((x - nx) ** 2 + (y - ny) ** 2);
+                if (dist < radius) return node;
+            }
+            return null;
+        }
+
+        function selectNode(nodeId) {
+            state.selectedNode = nodeId;
+            const node = state.graph.nodes.find(n => n.id === nodeId);
+            if (node) {
+                document.getElementById('nodeLabel').value = node.label;
+                document.getElementById('nodeVisibility').value = node.visibility;
+                document.getElementById('nodeAvatarTag').value = node.avatarTag;
+                document.getElementById('nodeInternalTag').value = node.internalTag;
+                document.getElementById('nodeLevel').value = node.level;
+                document.getElementById('inspector').classList.add('open');
+            }
+        }
+
+        function addNode(x, y) {
+            const id = 'node_' + Date.now();
+            const node = {
+                id,
+                label: 'New Node',
+                level: 'detail',
+                visibility: 'internal',
+                avatarTag: 'BLV',
+                internalTag: 'Offer',
+                colorGroup: 'blv',
+                x,
+                y
+            };
+            state.graph.nodes.push(node);
+            saveMap();
+            render();
+            showToast('Node added');
+        }
+
+        function addEdge(sourceId, targetId) {
+            const exists = state.graph.edges.some(e => e.source === sourceId && e.target === targetId);
+            if (!exists) {
+                state.graph.edges.push({ source: sourceId, target: targetId, controlPoint: null });
+                saveMap();
+                render();
+                showToast('Connection added');
+            }
+        }
+
+        function deleteNode() {
+            if (!state.selectedNode) return;
+
+            showConfirm('Delete this node and all its connections?', () => {
+                state.graph.nodes = state.graph.nodes.filter(n => n.id !== state.selectedNode);
+                state.graph.edges = state.graph.edges.filter(e =>
+                    e.source !== state.selectedNode && e.target !== state.selectedNode
+                );
+                state.selectedNode = null;
+                document.getElementById('inspector').classList.remove('open');
+                saveMap();
+                render();
+                showToast('Node deleted');
+            });
+        }
+
+        // ===== UI EVENT HANDLERS =====
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                state.currentTab = tab.dataset.tab;
+                state.activeFilters = [];
+                updateFilters();
+                render();
+            });
+        });
+
+        function updateFilters() {
+            const container = document.getElementById('filtersContainer');
+            container.innerHTML = '<span class="filter-label">Filters:</span>';
+
+            let filters = [];
+            if (state.currentTab === 'internal') {
+                filters = ['Brand', 'Dreamworks', 'Media', 'Offer', 'People', 'Process', 'Distribution'];
+            } else if (state.currentTab === 'external') {
+                filters = ['Creators', 'Companies', 'Foundations', 'Consumers', 'Experts', 'Miles', 'Distribution Channels'];
+            } else if (state.currentTab === 'people') {
+                filters = ['Miles', 'Experts', 'Distribution Channels', 'Creators', 'Companies', 'Foundations', 'People'];
+            } else if (state.currentTab === 'processes') {
+                filters = ['BLV', 'Creators', 'Companies', 'Foundations'];
+            }
+
+            filters.forEach(filter => {
+                const chip = document.createElement('div');
+                chip.className = 'filter-chip';
+                chip.textContent = filter;
+                chip.addEventListener('click', () => {
+                    const index = state.activeFilters.indexOf(filter);
+                    if (index > -1) {
+                        state.activeFilters.splice(index, 1);
+                        chip.classList.remove('active');
+                    } else {
+                        state.activeFilters.push(filter);
+                        chip.classList.add('active');
+                    }
+                    render();
+                });
+                container.appendChild(chip);
+            });
+        }
+
+        // Inspector updates
+        document.getElementById('nodeLabel').addEventListener('input', (e) => {
+            if (state.selectedNode) {
+                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                if (node) {
+                    node.label = e.target.value;
+                    saveMap();
+                    render();
+                }
+            }
+        });
+
+        document.getElementById('nodeVisibility').addEventListener('change', (e) => {
+            if (state.selectedNode) {
+                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                if (node) {
+                    node.visibility = e.target.value;
+                    saveMap();
+                    render();
+                }
+            }
+        });
+
+        document.getElementById('nodeAvatarTag').addEventListener('change', (e) => {
+            if (state.selectedNode) {
+                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                if (node) {
+                    node.avatarTag = e.target.value;
+                    saveMap();
+                    render();
+                }
+            }
+        });
+
+        document.getElementById('nodeInternalTag').addEventListener('change', (e) => {
+            if (state.selectedNode) {
+                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                if (node) {
+                    node.internalTag = e.target.value;
+                    saveMap();
+                    render();
+                }
+            }
+        });
+
+        document.getElementById('nodeLevel').addEventListener('change', (e) => {
+            if (state.selectedNode) {
+                const node = state.graph.nodes.find(n => n.id === state.selectedNode);
+                if (node) {
+                    node.level = e.target.value;
+                    saveMap();
+                    render();
+                }
+            }
+        });
+
+        document.getElementById('deleteNodeBtn').addEventListener('click', deleteNode);
+
+        // Control buttons
+        document.getElementById('addNodeBtn').addEventListener('click', () => {
+            state.addNodeMode = !state.addNodeMode;
+            if (state.addNodeMode) {
+                state.connectMode = false;
+                canvas.style.cursor = 'crosshair';
+                showToast('Click on canvas to place node');
+            } else {
+                canvas.style.cursor = 'grab';
+            }
+        });
+
+        document.getElementById('addEdgeBtn').addEventListener('click', () => {
+            state.connectMode = !state.connectMode;
+            if (state.connectMode) {
+                state.addNodeMode = false;
+                state.connectStart = null;
+                canvas.style.cursor = 'crosshair';
+                showToast('Click source node, then target node');
+            } else {
+                canvas.style.cursor = 'grab';
+            }
+        });
+
+        // AI Modal
+        document.getElementById('aiBtn').addEventListener('click', () => {
+            document.getElementById('aiModal').classList.add('open');
+        });
+
+        document.getElementById('closeAiBtn').addEventListener('click', () => {
+            document.getElementById('aiModal').classList.remove('open');
+        });
+
+        document.querySelectorAll('.modal-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                state.currentMode = tab.dataset.mode;
+                updateChatPlaceholder();
+            });
+        });
+
+        function updateChatPlaceholder() {
+            const input = document.getElementById('chatInput');
+            if (state.currentMode === 'chat') {
+                input.placeholder = 'Ask anything...';
+            } else if (state.currentMode === 'generate') {
+                input.placeholder = 'Describe what to generate...';
+            } else if (state.currentMode === 'update') {
+                input.placeholder = 'Describe changes to selection...';
+            }
+        }
+
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            addChatMessage('user', message);
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="spinner"></span>';
+
+            try {
+                if (state.currentMode === 'chat') {
+                    await handleChat(message);
+                } else if (state.currentMode === 'generate') {
+                    await handleGenerate(message);
+                } else if (state.currentMode === 'update') {
+                    await handleUpdate(message);
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                addChatMessage('assistant', 'Sorry, an error occurred: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            }
+        }
+
+        async function handleChat(message) {
+            state.chatHistory.push({ role: 'user', content: message });
+
+            const response = await fetch('/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: state.chatHistory })
+            });
+
+            if (!response.ok) throw new Error('Chat request failed');
+
+            const data = await response.json();
+            state.chatHistory.push({ role: 'assistant', content: data.reply });
+            addChatMessage('assistant', data.reply);
+        }
+
+        async function handleGenerate(instruction) {
+            const response = await fetch('/ai/graph', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: 'generate',
+                    instruction,
+                    graph: state.graph,
+                    selection: state.selectedNode ? { nodeIds: [state.selectedNode], edgeIds: [] } : null
+                })
+            });
+
+            if (!response.ok) throw new Error('Generate request failed');
+
+            const data = await response.json();
+            showPreview(data);
+            addChatMessage('assistant', 'Generated new nodes. Review and apply changes.');
+        }
+
+        async function handleUpdate(instruction) {
+            if (!state.selectedNode) {
+                showToast('Please select a node first', 'error');
+                addChatMessage('assistant', 'Please select a node to update.');
+                return;
+            }
+
+            const response = await fetch('/ai/graph', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: 'update',
+                    instruction,
+                    graph: state.graph,
+                    selection: { nodeIds: [state.selectedNode], edgeIds: [] }
+                })
+            });
+
+            if (!response.ok) throw new Error('Update request failed');
+
+            const data = await response.json();
+            showPreview(data);
+            addChatMessage('assistant', 'Updated selection. Review and apply changes.');
+        }
+
+        function addChatMessage(role, content) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            messageDiv.textContent = content;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function showPreview(changes) {
+            state.preview = changes;
+            const panel = document.getElementById('previewPanel');
+            const content = document.getElementById('previewContent');
+
+            let summary = '';
+            if (changes.nodes && changes.nodes.length > 0) {
+                summary += `${changes.nodes.length} node(s) to add/update\n`;
+                changes.nodes.forEach(n => {
+                    summary += `- ${n.label} (${n.internalTag})\n`;
+                });
+            }
+            if (changes.edges && changes.edges.length > 0) {
+                summary += `\n${changes.edges.length} connection(s) to add/update`;
+            }
+
+            content.textContent = summary;
+            panel.classList.add('open');
+        }
+
+        document.getElementById('cancelPreviewBtn').addEventListener('click', () => {
+            state.preview = null;
+            document.getElementById('previewPanel').classList.remove('open');
+        });
+
+        document.getElementById('applyPreviewBtn').addEventListener('click', () => {
+            if (state.preview) {
+                if (state.preview.nodes) {
+                    state.preview.nodes.forEach(newNode => {
+                        const existing = state.graph.nodes.find(n => n.id === newNode.id);
+                        if (existing) {
+                            Object.assign(existing, newNode);
+                        } else {
+                            state.graph.nodes.push(newNode);
+                        }
+                    });
+                }
+                if (state.preview.edges) {
+                    state.preview.edges.forEach(newEdge => {
+                        const exists = state.graph.edges.some(e =>
+                            e.source === newEdge.source && e.target === newEdge.target
+                        );
+                        if (!exists) {
+                            state.graph.edges.push(newEdge);
+                        }
+                    });
+                }
+                saveMap();
+                render();
+                showToast('Changes applied', 'success');
+            }
+            state.preview = null;
+            document.getElementById('previewPanel').classList.remove('open');
+        });
+
+        // Save/Load
+        document.getElementById('saveMapBtn').addEventListener('click', saveMap);
+        document.getElementById('openMapBtn').addEventListener('click', () => {
+            const mapId = prompt('Enter map ID to load:', 'BLV-Ecosystem-Map');
+            if (mapId) loadMap(mapId);
+        });
+
+        async function saveMap() {
+            try {
+                const response = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mapId: 'BLV-Ecosystem-Map',
+                        graph: state.graph,
+                        chatHistory: state.chatHistory
+                    })
+                });
+
+                if (!response.ok) throw new Error('Save failed');
+                console.log('Map saved');
+            } catch (error) {
+                console.error('Save error:', error);
+            }
+        }
+
+        async function loadMap(mapId) {
+            try {
+                const response = await fetch(`/api/load?mapId=${encodeURIComponent(mapId)}`);
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showToast('Map not found, loading default', 'error');
+                        initializeDefaultMap();
+                        return;
+                    }
+                    throw new Error('Load failed');
+                }
+
+                const data = await response.json();
+                state.graph = data.graph;
+                state.chatHistory = data.chatHistory || [];
+                render();
+                showToast('Map loaded', 'success');
+            } catch (error) {
+                showToast('Error loading map: ' + error.message, 'error');
+            }
+        }
+
+        function initializeDefaultMap() {
+            state.graph = getDefaultMap();
+            saveMap();
+            render();
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast';
+            if (type) toast.classList.add(type);
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Confirm dialog
+        function showConfirm(message, onConfirm) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+
+            const dialog = document.createElement('div');
+            dialog.className = 'confirm-dialog';
+            dialog.innerHTML = `
+                <h4>Confirm</h4>
+                <p>${message}</p>
+                <div class="confirm-actions">
+                    <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
+                    <button class="btn btn-danger" id="confirmOk">Delete</button>
+                </div>
+            `;
+
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+
+            document.getElementById('confirmCancel').onclick = () => {
+                document.body.removeChild(overlay);
+            };
+
+            document.getElementById('confirmOk').onclick = () => {
+                document.body.removeChild(overlay);
+                onConfirm();
+            };
+        }
+
+        // ===== INITIALIZATION =====
+        async function init() {
+            updateFilters();
+
+            // Try to load existing map, or create default
+            try {
+                const response = await fetch('/api/load?mapId=BLV-Ecosystem-Map');
+                if (response.ok) {
+                    const data = await response.json();
+                    // Always reset to default for this release
+                    initializeDefaultMap();
+                    showToast('Default map loaded');
+                } else {
+                    initializeDefaultMap();
+                    showToast('Default map initialized');
+                }
+            } catch (error) {
+                initializeDefaultMap();
+                showToast('Default map initialized');
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
