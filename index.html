@@ -1548,36 +1548,50 @@
         async function handleChat(message) {
             state.chatHistory.push({ role: 'user', content: message });
 
-            const response = await fetch('/ai/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: state.chatHistory })
-            });
+            try {
+                const response = await fetch('/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: state.chatHistory })
+                });
 
-            if (!response.ok) throw new Error('Chat request failed');
+                if (!response.ok) {
+                    throw new Error('AI backend not available. Deploy to Cloudflare Pages with the claude env var to enable AI features.');
+                }
 
-            const data = await response.json();
-            state.chatHistory.push({ role: 'assistant', content: data.reply });
-            addChatMessage('assistant', data.reply);
+                const data = await response.json();
+                state.chatHistory.push({ role: 'assistant', content: data.reply });
+                addChatMessage('assistant', data.reply);
+            } catch (error) {
+                addChatMessage('assistant', 'AI features require Cloudflare Pages deployment with the "claude" environment variable configured. You can still manually add/edit nodes using the controls.');
+                throw error;
+            }
         }
 
         async function handleGenerate(instruction) {
-            const response = await fetch('/ai/graph', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    mode: 'generate',
-                    instruction,
-                    graph: state.graph,
-                    selection: state.selectedNode ? { nodeIds: [state.selectedNode], edgeIds: [] } : null
-                })
-            });
+            try {
+                const response = await fetch('/ai/graph', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mode: 'generate',
+                        instruction,
+                        graph: state.graph,
+                        selection: state.selectedNode ? { nodeIds: [state.selectedNode], edgeIds: [] } : null
+                    })
+                });
 
-            if (!response.ok) throw new Error('Generate request failed');
+                if (!response.ok) {
+                    throw new Error('AI backend not available. Deploy to Cloudflare Pages with the claude env var to enable AI features.');
+                }
 
-            const data = await response.json();
-            showPreview(data);
-            addChatMessage('assistant', 'Generated new nodes. Review and apply changes.');
+                const data = await response.json();
+                showPreview(data);
+                addChatMessage('assistant', 'Generated new nodes. Review and apply changes.');
+            } catch (error) {
+                addChatMessage('assistant', 'AI features require Cloudflare Pages deployment. For now, you can manually add nodes using the "+ Node" button and connect them with the "→" button.');
+                throw error;
+            }
         }
 
         async function handleUpdate(instruction) {
@@ -1587,22 +1601,29 @@
                 return;
             }
 
-            const response = await fetch('/ai/graph', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    mode: 'update',
-                    instruction,
-                    graph: state.graph,
-                    selection: { nodeIds: [state.selectedNode], edgeIds: [] }
-                })
-            });
+            try {
+                const response = await fetch('/ai/graph', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mode: 'update',
+                        instruction,
+                        graph: state.graph,
+                        selection: { nodeIds: [state.selectedNode], edgeIds: [] }
+                    })
+                });
 
-            if (!response.ok) throw new Error('Update request failed');
+                if (!response.ok) {
+                    throw new Error('AI backend not available. Deploy to Cloudflare Pages with the claude env var to enable AI features.');
+                }
 
-            const data = await response.json();
-            showPreview(data);
-            addChatMessage('assistant', 'Updated selection. Review and apply changes.');
+                const data = await response.json();
+                showPreview(data);
+                addChatMessage('assistant', 'Updated selection. Review and apply changes.');
+            } catch (error) {
+                addChatMessage('assistant', 'AI features require Cloudflare Pages deployment. You can manually edit the selected node using the inspector panel on the right.');
+                throw error;
+            }
         }
 
         function addChatMessage(role, content) {
@@ -1683,6 +1704,7 @@
 
         async function saveMap() {
             try {
+                // Try API first
                 const response = await fetch('/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1693,35 +1715,64 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('Save failed');
-                console.log('Map saved');
+                if (response.ok) {
+                    console.log('Map saved to KV');
+                    return;
+                }
             } catch (error) {
-                console.error('Save error:', error);
+                console.warn('KV save failed, using localStorage:', error);
+            }
+
+            // Fallback to localStorage
+            try {
+                localStorage.setItem('BLV-Ecosystem-Map', JSON.stringify({
+                    graph: state.graph,
+                    chatHistory: state.chatHistory,
+                    updatedAt: new Date().toISOString()
+                }));
+                console.log('Map saved to localStorage');
+            } catch (error) {
+                console.error('localStorage save failed:', error);
             }
         }
 
         async function loadMap(mapId) {
             try {
+                // Try API first
                 const response = await fetch(`/api/load?mapId=${encodeURIComponent(mapId)}`);
 
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        showToast('Map not found, loading default', 'error');
-                        initializeDefaultMap();
-                        return;
-                    }
-                    throw new Error('Load failed');
+                if (response.ok) {
+                    const data = await response.json();
+                    state.graph = data.graph;
+                    state.chatHistory = data.chatHistory || [];
+                    invalidateCache();
+                    render();
+                    showToast('Map loaded from KV', 'success');
+                    return;
                 }
-
-                const data = await response.json();
-                state.graph = data.graph;
-                state.chatHistory = data.chatHistory || [];
-                invalidateCache();
-                render();
-                showToast('Map loaded', 'success');
             } catch (error) {
-                showToast('Error loading map: ' + error.message, 'error');
+                console.warn('KV load failed, trying localStorage:', error);
             }
+
+            // Fallback to localStorage
+            try {
+                const stored = localStorage.getItem(mapId);
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    state.graph = data.graph;
+                    state.chatHistory = data.chatHistory || [];
+                    invalidateCache();
+                    render();
+                    showToast('Map loaded from localStorage', 'success');
+                    return;
+                }
+            } catch (error) {
+                console.error('localStorage load failed:', error);
+            }
+
+            // If both fail, show error
+            showToast('Map not found, loading default', 'error');
+            initializeDefaultMap();
         }
 
         function initializeDefaultMap() {
