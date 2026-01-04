@@ -772,7 +772,14 @@
                 { id: 'proc_software', label: 'Software Development', level: 'secondary', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Process', colorGroup: 'process', x: 450, y: 550 },
                 { id: 'proc_creator_engage', label: 'Creator Engagement', level: 'secondary', visibility: 'internal', avatarTag: 'Creators', internalTag: 'Process', colorGroup: 'process', x: 550, y: 550 },
                 { id: 'proc_business_engage', label: 'Business Engagement', level: 'secondary', visibility: 'internal', avatarTag: 'Companies', internalTag: 'Process', colorGroup: 'process', x: 650, y: 550 },
-                { id: 'proc_foundation_programs', label: 'Foundation Programs', level: 'secondary', visibility: 'internal', avatarTag: 'Foundations', internalTag: 'Process', colorGroup: 'process', x: 750, y: 550 }
+                { id: 'proc_foundation_programs', label: 'Foundation Programs', level: 'secondary', visibility: 'internal', avatarTag: 'Foundations', internalTag: 'Process', colorGroup: 'process', x: 750, y: 550 },
+
+                // App Ideas and detail nodes
+                { id: 'app_ideas', label: 'App Ideas', level: 'secondary', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Dreamworks', colorGroup: 'dreamworks', x: 500, y: 350 },
+                { id: 'app_blv_profile', label: 'BLV Profile', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Dreamworks', colorGroup: 'dreamworks', x: 350, y: 450 },
+                { id: 'app_decision_machine', label: 'Decision Making Machine', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Dreamworks', colorGroup: 'dreamworks', x: 450, y: 450 },
+                { id: 'app_window_app', label: 'Window App', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Dreamworks', colorGroup: 'dreamworks', x: 550, y: 450 },
+                { id: 'app_idea_credit', label: 'Idea Credit System', level: 'detail', visibility: 'internal', avatarTag: 'BLV', internalTag: 'Dreamworks', colorGroup: 'dreamworks', x: 650, y: 450 }
             ];
 
             const edges = [
@@ -812,7 +819,14 @@
                 { source: 'blv_dreamworks', target: 'proc_software', controlPoint: null },
                 { source: 'avatar_creators', target: 'proc_creator_engage', controlPoint: null },
                 { source: 'avatar_companies', target: 'proc_business_engage', controlPoint: null },
-                { source: 'avatar_foundations', target: 'proc_foundation_programs', controlPoint: null }
+                { source: 'avatar_foundations', target: 'proc_foundation_programs', controlPoint: null },
+
+                // App Ideas connections
+                { source: 'blv_dreamworks', target: 'app_ideas', controlPoint: null },
+                { source: 'app_ideas', target: 'app_blv_profile', controlPoint: null },
+                { source: 'app_ideas', target: 'app_decision_machine', controlPoint: null },
+                { source: 'app_ideas', target: 'app_window_app', controlPoint: null },
+                { source: 'app_ideas', target: 'app_idea_credit', controlPoint: null }
             ];
 
             return { nodes, edges };
