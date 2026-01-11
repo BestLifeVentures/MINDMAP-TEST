@@ -82,6 +82,7 @@
             display: flex;
             gap: 4px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
         }
 
         .tab {
@@ -103,6 +104,93 @@
         .tab.active {
             color: #d4af37;
             border-bottom-color: #d4af37;
+        }
+
+        .tab-plus {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: -16px;
+            transition: all 0.2s;
+        }
+
+        .tab-plus:hover {
+            background: rgba(212, 175, 55, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Subheader for boards */
+        .subheader {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 8px 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: 44px;
+        }
+
+        .subheader.active {
+            display: flex;
+        }
+
+        .boards-scroll {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+        }
+
+        .boards-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .board-pill {
+            padding: 6px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #d4af37;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .board-pill:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+        }
+
+        .board-pill.active {
+            background: rgba(212, 175, 55, 0.3);
+            border-color: #d4af37;
+        }
+
+        .boards-search-btn {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #aaa;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .boards-search-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #e0e0e0;
         }
 
         /* Filter chips */
@@ -764,6 +852,176 @@
             gap: 12px;
             justify-content: flex-end;
         }
+
+        /* Edge Delete Button */
+        .edge-delete-btn {
+            position: fixed;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .edge-delete-btn.show {
+            display: flex;
+        }
+
+        .edge-delete-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: scale(1.1);
+        }
+
+        /* Board creation popup */
+        .board-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.98);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            z-index: 3000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            min-width: 400px;
+            display: none;
+        }
+
+        .board-popup.show {
+            display: block;
+        }
+
+        .board-popup h4 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            color: #d4af37;
+        }
+
+        .board-popup input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e0e0e0;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .board-popup input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .board-popup-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* Board confirmation popup */
+        .board-confirm-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.98);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            z-index: 3000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            min-width: 360px;
+            display: none;
+        }
+
+        .board-confirm-popup.show {
+            display: block;
+        }
+
+        .board-confirm-popup h4 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #f0f0f0;
+        }
+
+        .board-confirm-popup p {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .board-confirm-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* Search modal */
+        .search-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.98);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 3000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            width: 500px;
+            max-width: 90vw;
+            display: none;
+        }
+
+        .search-modal.show {
+            display: block;
+        }
+
+        .search-modal input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e0e0e0;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .search-modal input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: rgba(212, 175, 55, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -783,6 +1041,13 @@
             <button class="tab" data-tab="external">External</button>
             <button class="tab" data-tab="people">People</button>
             <button class="tab" data-tab="processes">Processes</button>
+            <div class="tab-plus" id="createBoardBtn" title="Create New Board">+</div>
+        </div>
+
+        <!-- Subheader for boards -->
+        <div class="subheader" id="subheader">
+            <div class="boards-scroll" id="boardsScroll"></div>
+            <button class="boards-search-btn" id="searchBoardsBtn">🔍 Search</button>
         </div>
 
         <!-- Filters -->
@@ -920,6 +1185,41 @@
     <!-- Toast container -->
     <div class="toast" id="toast"></div>
 
+    <!-- Edge delete button -->
+    <div class="edge-delete-btn" id="edgeDeleteBtn">×</div>
+
+    <!-- Board creation popup -->
+    <div class="modal-overlay" id="boardPopupOverlay">
+        <div class="board-popup" id="boardPopup">
+            <h4>Create New Board</h4>
+            <input type="text" id="boardTitleInput" placeholder="Enter board title..." />
+            <div class="board-popup-actions">
+                <button class="btn btn-secondary" id="cancelBoardBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmBoardTitleBtn">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Board confirmation popup -->
+    <div class="modal-overlay" id="boardConfirmOverlay">
+        <div class="board-confirm-popup" id="boardConfirmPopup">
+            <h4>Save Board?</h4>
+            <p>Do you want to save this board before leaving?</p>
+            <div class="board-confirm-actions">
+                <button class="btn btn-danger" id="deleteBoardBtn">Delete Board</button>
+                <button class="btn btn-primary" id="confirmBoardBtn">Confirm Board</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search modal -->
+    <div class="modal-overlay" id="searchModalOverlay">
+        <div class="search-modal" id="searchModal">
+            <input type="text" id="searchBoardInput" placeholder="Search boards..." />
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
     <script>
         // ===== PERFORMANCE OPTIMIZATIONS =====
         // Transient positions for smooth dragging
@@ -945,6 +1245,7 @@
             activeFilters: [],
             selectedNode: null,
             selectedEdge: null,
+            clickedEdge: null,
             graph: { nodes: [], edges: [] },
             chatHistory: [],
             preview: null,
@@ -956,7 +1257,10 @@
             connectMode: false,
             connectStart: null,
             addNodeMode: false,
-            mousePos: null
+            mousePos: null,
+            boards: [],
+            currentBoard: null,
+            pendingBoardGraph: null
         };
 
         // Debounced save function
@@ -1492,12 +1796,22 @@
                 return;
             }
 
+            // Check for edge click
+            const clickedEdge = getEdgeAtPosition(x, y);
+            if (clickedEdge) {
+                showEdgeDeleteButton(clickedEdge, x, y);
+                state.clickedEdge = clickedEdge;
+                return;
+            }
+
             const clickedNode = getNodeAtPosition(x, y);
             if (clickedNode) {
                 selectNode(clickedNode.id);
+                hideEdgeDeleteButton();
             } else {
                 state.selectedNode = null;
                 state.selectedEdge = null;
+                hideEdgeDeleteButton();
                 document.getElementById('inspector').classList.remove('open');
             }
             render();
@@ -1578,6 +1892,94 @@
                 showToast('Node deleted');
             });
         }
+
+        // ===== EDGE DELETION =====
+        function getEdgeAtPosition(x, y) {
+            const visibleNodes = getVisibleNodes();
+            const visibleEdges = getVisibleEdges(visibleNodes);
+            const nodesById = buildNodesById();
+            const threshold = 10; // Click distance threshold
+
+            for (const edge of visibleEdges) {
+                const sourceNode = nodesById[edge.source];
+                const targetNode = nodesById[edge.target];
+
+                if (!sourceNode || !targetNode) continue;
+
+                const sourcePos = getNodePosition(sourceNode);
+                const targetPos = getNodePosition(targetNode);
+
+                const x1 = sourcePos.x + state.panOffset.x;
+                const y1 = sourcePos.y + state.panOffset.y;
+                const x2 = targetPos.x + state.panOffset.x;
+                const y2 = targetPos.y + state.panOffset.y;
+
+                // Get control point
+                let cpX, cpY;
+                const controlPoint = getEdgeControlPoint(edge);
+                if (controlPoint) {
+                    cpX = controlPoint.x + state.panOffset.x;
+                    cpY = controlPoint.y + state.panOffset.y;
+                } else {
+                    cpX = (x1 + x2) / 2;
+                    cpY = (y1 + y2) / 2 - 30;
+                }
+
+                // Check distance to quadratic curve using approximation
+                const dist = distanceToQuadraticBezier(x, y, x1, y1, cpX, cpY, x2, y2);
+                if (dist < threshold) {
+                    return edge;
+                }
+            }
+
+            return null;
+        }
+
+        function distanceToQuadraticBezier(px, py, x1, y1, cx, cy, x2, y2) {
+            // Sample the curve at multiple points and find minimum distance
+            let minDist = Infinity;
+            const steps = 20;
+
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const t1 = 1 - t;
+
+                // Quadratic Bezier formula
+                const qx = t1 * t1 * x1 + 2 * t1 * t * cx + t * t * x2;
+                const qy = t1 * t1 * y1 + 2 * t1 * t * cy + t * t * y2;
+
+                const dist = Math.sqrt((px - qx) ** 2 + (py - qy) ** 2);
+                minDist = Math.min(minDist, dist);
+            }
+
+            return minDist;
+        }
+
+        function showEdgeDeleteButton(edge, x, y) {
+            const btn = document.getElementById('edgeDeleteBtn');
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+            btn.classList.add('show');
+        }
+
+        function hideEdgeDeleteButton() {
+            const btn = document.getElementById('edgeDeleteBtn');
+            btn.classList.remove('show');
+            state.clickedEdge = null;
+        }
+
+        document.getElementById('edgeDeleteBtn').addEventListener('click', () => {
+            if (state.clickedEdge) {
+                state.graph.edges = state.graph.edges.filter(e =>
+                    !(e.source === state.clickedEdge.source && e.target === state.clickedEdge.target)
+                );
+                hideEdgeDeleteButton();
+                invalidateCache();
+                debouncedSave();
+                render();
+                showToast('Connection deleted');
+            }
+        });
 
         // ===== UI EVENT HANDLERS =====
         document.querySelectorAll('.tab').forEach(tab => {
@@ -2366,9 +2768,290 @@
             return { nodes, edges };
         }
 
+        // ===== CUSTOM BOARDS SYSTEM =====
+        function loadBoards() {
+            try {
+                const stored = localStorage.getItem('BLV-Custom-Boards');
+                if (stored) {
+                    state.boards = JSON.parse(stored);
+                }
+            } catch (error) {
+                console.error('Failed to load boards:', error);
+                state.boards = [];
+            }
+        }
+
+        function saveBoards() {
+            try {
+                localStorage.setItem('BLV-Custom-Boards', JSON.stringify(state.boards));
+            } catch (error) {
+                console.error('Failed to save boards:', error);
+            }
+        }
+
+        function renderBoardPills() {
+            const container = document.getElementById('boardsScroll');
+            container.innerHTML = '';
+
+            // Show most recent 5 boards
+            const recentBoards = state.boards.slice(0, 5);
+
+            recentBoards.forEach(board => {
+                const pill = document.createElement('div');
+                pill.className = 'board-pill';
+                if (state.currentBoard && state.currentBoard.id === board.id) {
+                    pill.classList.add('active');
+                }
+                pill.textContent = board.title;
+                pill.addEventListener('click', () => loadBoard(board));
+                container.appendChild(pill);
+            });
+        }
+
+        function createBoard(title) {
+            const board = {
+                id: 'board_' + Date.now(),
+                title,
+                graph: { nodes: [], edges: [] },
+                createdAt: new Date().toISOString()
+            };
+
+            // Save current graph before switching
+            if (state.currentBoard) {
+                const existingBoard = state.boards.find(b => b.id === state.currentBoard.id);
+                if (existingBoard) {
+                    existingBoard.graph = state.graph;
+                }
+            }
+
+            // Switch to blank board
+            state.pendingBoardGraph = state.graph;
+            state.currentBoard = board;
+            state.graph = { nodes: [], edges: [] };
+
+            // Add to boards list (most recent first)
+            state.boards.unshift(board);
+
+            invalidateCache();
+            render();
+            renderBoardPills();
+            showSubheader();
+            saveBoards();
+
+            showToast('Board created: ' + title, 'success');
+        }
+
+        function loadBoard(board) {
+            // Save current board before switching
+            if (state.currentBoard) {
+                const existingBoard = state.boards.find(b => b.id === state.currentBoard.id);
+                if (existingBoard) {
+                    existingBoard.graph = state.graph;
+                    saveBoards();
+                }
+            }
+
+            state.currentBoard = board;
+            state.graph = board.graph;
+
+            invalidateCache();
+            render();
+            renderBoardPills();
+
+            showToast('Loaded: ' + board.title, 'success');
+        }
+
+        function confirmCurrentBoard() {
+            if (state.currentBoard) {
+                const board = state.boards.find(b => b.id === state.currentBoard.id);
+                if (board) {
+                    board.graph = state.graph;
+                    saveBoards();
+                    showToast('Board saved', 'success');
+                }
+            }
+            hideboardConfirmPopup();
+        }
+
+        function deleteCurrentBoard() {
+            if (state.currentBoard) {
+                state.boards = state.boards.filter(b => b.id !== state.currentBoard.id);
+                state.currentBoard = null;
+
+                // Restore previous graph or default
+                if (state.pendingBoardGraph) {
+                    state.graph = state.pendingBoardGraph;
+                    state.pendingBoardGraph = null;
+                } else {
+                    initializeDefaultMap();
+                }
+
+                invalidateCache();
+                render();
+                renderBoardPills();
+                saveBoards();
+                hideSubheader();
+
+                showToast('Board deleted', 'success');
+            }
+            hideBoardConfirmPopup();
+        }
+
+        function showSubheader() {
+            document.getElementById('subheader').classList.add('active');
+        }
+
+        function hideSubheader() {
+            if (state.boards.length === 0) {
+                document.getElementById('subheader').classList.remove('active');
+            }
+        }
+
+        function searchBoards(query) {
+            const results = state.boards.filter(board =>
+                board.title.toLowerCase().includes(query.toLowerCase())
+            );
+
+            const container = document.getElementById('searchResults');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<div class="search-result-item">No boards found</div>';
+                return;
+            }
+
+            results.forEach(board => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = board.title;
+                item.addEventListener('click', () => {
+                    loadBoard(board);
+                    hideSearchModal();
+                });
+                container.appendChild(item);
+            });
+        }
+
+        function showBoardPopup() {
+            document.getElementById('boardPopupOverlay').classList.add('open');
+            document.getElementById('boardPopup').classList.add('show');
+            document.getElementById('boardTitleInput').value = '';
+            document.getElementById('boardTitleInput').focus();
+        }
+
+        function hideBoardPopup() {
+            document.getElementById('boardPopupOverlay').classList.remove('open');
+            document.getElementById('boardPopup').classList.remove('show');
+        }
+
+        function showBoardConfirmPopup() {
+            document.getElementById('boardConfirmOverlay').classList.add('open');
+            document.getElementById('boardConfirmPopup').classList.add('show');
+        }
+
+        function hideBoardConfirmPopup() {
+            document.getElementById('boardConfirmOverlay').classList.remove('open');
+            document.getElementById('boardConfirmPopup').classList.remove('show');
+        }
+
+        function showSearchModal() {
+            document.getElementById('searchModalOverlay').classList.add('open');
+            document.getElementById('searchModal').classList.add('show');
+            document.getElementById('searchBoardInput').value = '';
+            document.getElementById('searchBoardInput').focus();
+        }
+
+        function hideSearchModal() {
+            document.getElementById('searchModalOverlay').classList.remove('open');
+            document.getElementById('searchModal').classList.remove('show');
+        }
+
+        // Board event listeners
+        document.getElementById('createBoardBtn').addEventListener('click', () => {
+            showBoardPopup();
+        });
+
+        document.getElementById('cancelBoardBtn').addEventListener('click', () => {
+            hideBoardPopup();
+        });
+
+        document.getElementById('confirmBoardTitleBtn').addEventListener('click', () => {
+            const title = document.getElementById('boardTitleInput').value.trim();
+            if (title) {
+                createBoard(title);
+                hideBoardPopup();
+            } else {
+                showToast('Please enter a board title', 'error');
+            }
+        });
+
+        document.getElementById('boardTitleInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const title = document.getElementById('boardTitleInput').value.trim();
+                if (title) {
+                    createBoard(title);
+                    hideBoardPopup();
+                }
+            }
+        });
+
+        document.getElementById('confirmBoardBtn').addEventListener('click', () => {
+            confirmCurrentBoard();
+        });
+
+        document.getElementById('deleteBoardBtn').addEventListener('click', () => {
+            deleteCurrentBoard();
+        });
+
+        document.getElementById('searchBoardsBtn').addEventListener('click', () => {
+            showSearchModal();
+        });
+
+        document.getElementById('searchBoardInput').addEventListener('input', (e) => {
+            searchBoards(e.target.value);
+        });
+
+        // Close modals when clicking overlay
+        document.getElementById('boardPopupOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'boardPopupOverlay') {
+                hideBoardPopup();
+            }
+        });
+
+        document.getElementById('boardConfirmOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'boardConfirmOverlay') {
+                hideBoardConfirmPopup();
+            }
+        });
+
+        document.getElementById('searchModalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'searchModalOverlay') {
+                hideSearchModal();
+            }
+        });
+
+        // Listen for tab changes to show confirmation if on a board
+        const originalTabClickHandler = document.querySelectorAll('.tab');
+        originalTabClickHandler.forEach(tab => {
+            tab.addEventListener('click', () => {
+                if (state.currentBoard && tab.dataset.tab !== 'processes') {
+                    // If leaving processes tab while on a board, show confirmation
+                    if (state.currentTab === 'processes') {
+                        showBoardConfirmPopup();
+                    }
+                }
+            });
+        });
+
         // ===== INITIALIZATION =====
         async function init() {
             updateFilters();
+            loadBoards();
+            renderBoardPills();
+
+            if (state.boards.length > 0) {
+                showSubheader();
+            }
 
             // Try to load existing map, or create default
             try {
