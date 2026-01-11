@@ -703,6 +703,117 @@
             margin: 0;
         }
 
+        .text-mode-controls {
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .layout-toggle {
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 4px;
+        }
+
+        .layout-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            color: #888;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .layout-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+
+        .layout-btn.active {
+            background: rgba(212, 175, 55, 0.3);
+            color: #d4af37;
+        }
+
+        .color-scheme-dropdown {
+            position: relative;
+        }
+
+        .paintbrush-btn {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .paintbrush-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #d4af37;
+        }
+
+        .color-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: rgba(30, 30, 30, 0.98);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .color-dropdown.show {
+            display: flex;
+        }
+
+        .color-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .color-option.active {
+            background: rgba(212, 175, 55, 0.2);
+        }
+
+        .color-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .color-name {
+            font-size: 13px;
+            color: #e0e0e0;
+        }
+
         .text-mode-help {
             padding: 12px 20px;
             background: rgba(0, 0, 0, 0.2);
@@ -1107,6 +1218,17 @@
                         <option value="detail">Detail</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Color Scheme</label>
+                    <select id="nodeColorGroup">
+                        <option value="gold">Gold</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="purple">Purple</option>
+                        <option value="blue">Blue</option>
+                        <option value="teal">Teal</option>
+                        <option value="orange">Orange</option>
+                    </select>
+                </div>
                 <button class="btn btn-danger" id="deleteNodeBtn">Delete Node</button>
             </div>
 
@@ -1126,6 +1248,41 @@
             <div class="text-mode-header">
                 <h3>📝 Text Mode</h3>
                 <button class="close-btn" id="closeTextModeBtn">×</button>
+            </div>
+            <div class="text-mode-controls">
+                <div class="layout-toggle">
+                    <button class="layout-btn active" data-layout="vertical">Vertical</button>
+                    <button class="layout-btn" data-layout="horizontal">Horizontal</button>
+                </div>
+                <div class="color-scheme-dropdown">
+                    <button class="paintbrush-btn" id="textColorSchemeBtn">🎨</button>
+                    <div class="color-dropdown" id="textColorDropdown">
+                        <div class="color-option" data-color="gold">
+                            <div class="color-preview" style="background: linear-gradient(135deg, #d4af37, #f4d03f);"></div>
+                            <span class="color-name">Gold</span>
+                        </div>
+                        <div class="color-option" data-color="emerald">
+                            <div class="color-preview" style="background: linear-gradient(135deg, #2ecc71, #27ae60);"></div>
+                            <span class="color-name">Emerald</span>
+                        </div>
+                        <div class="color-option" data-color="purple">
+                            <div class="color-preview" style="background: linear-gradient(135deg, #8e44ad, #9b59b6);"></div>
+                            <span class="color-name">Purple</span>
+                        </div>
+                        <div class="color-option" data-color="blue">
+                            <div class="color-preview" style="background: linear-gradient(135deg, #3498db, #2980b9);"></div>
+                            <span class="color-name">Blue</span>
+                        </div>
+                        <div class="color-option" data-color="teal">
+                            <div class="color-preview" style="background: linear-gradient(135deg, #1abc9c, #16a085);"></div>
+                            <span class="color-name">Teal</span>
+                        </div>
+                        <div class="color-option" data-color="orange">
+                            <div class="color-preview" style="background: linear-gradient(135deg, #e67e22, #d35400);"></div>
+                            <span class="color-name">Orange</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="text-mode-help">
                 <span><kbd>Enter</kbd> New sibling</span>
@@ -1370,13 +1527,39 @@
         }
 
         // ===== COLOR SCHEMES =====
+        // Color schemes - 6 main colors
         const colorSchemes = {
-            blv: { primary: ['#d4af37', '#f4d03f'], secondary: ['rgba(212, 175, 55, 0.3)', 'rgba(244, 208, 63, 0.3)'] },
-            brand: { primary: ['#2ecc71', '#27ae60'], secondary: ['rgba(46, 204, 113, 0.3)', 'rgba(39, 174, 96, 0.3)'] },
-            dreamworks: { primary: ['#8e44ad', '#9b59b6'], secondary: ['rgba(142, 68, 173, 0.3)', 'rgba(155, 89, 182, 0.3)'] },
-            media: { primary: ['#3498db', '#2980b9'], secondary: ['rgba(52, 152, 219, 0.3)', 'rgba(41, 128, 185, 0.3)'] },
-            people: { primary: ['#1abc9c', '#16a085'], secondary: ['rgba(26, 188, 156, 0.3)', 'rgba(22, 160, 133, 0.3)'] },
-            process: { primary: ['#e67e22', '#d35400'], secondary: ['rgba(230, 126, 34, 0.3)', 'rgba(211, 84, 0, 0.3)'] }
+            gold: {
+                solid: ['#d4af37', '#f4d03f'],
+                fill: ['rgba(212, 175, 55, 0.6)', 'rgba(244, 208, 63, 0.6)']
+            },
+            emerald: {
+                solid: ['#2ecc71', '#27ae60'],
+                fill: ['rgba(46, 204, 113, 0.6)', 'rgba(39, 174, 96, 0.6)']
+            },
+            purple: {
+                solid: ['#8e44ad', '#9b59b6'],
+                fill: ['rgba(142, 68, 173, 0.6)', 'rgba(155, 89, 182, 0.6)']
+            },
+            blue: {
+                solid: ['#3498db', '#2980b9'],
+                fill: ['rgba(52, 152, 219, 0.6)', 'rgba(41, 128, 185, 0.6)']
+            },
+            teal: {
+                solid: ['#1abc9c', '#16a085'],
+                fill: ['rgba(26, 188, 156, 0.6)', 'rgba(22, 160, 133, 0.6)']
+            },
+            orange: {
+                solid: ['#e67e22', '#d35400'],
+                fill: ['rgba(230, 126, 34, 0.6)', 'rgba(211, 84, 0, 0.6)']
+            },
+            // Legacy mappings for existing nodes
+            blv: { solid: ['#d4af37', '#f4d03f'], fill: ['rgba(212, 175, 55, 0.6)', 'rgba(244, 208, 63, 0.6)'] },
+            brand: { solid: ['#2ecc71', '#27ae60'], fill: ['rgba(46, 204, 113, 0.6)', 'rgba(39, 174, 96, 0.6)'] },
+            dreamworks: { solid: ['#8e44ad', '#9b59b6'], fill: ['rgba(142, 68, 173, 0.6)', 'rgba(155, 89, 182, 0.6)'] },
+            media: { solid: ['#3498db', '#2980b9'], fill: ['rgba(52, 152, 219, 0.6)', 'rgba(41, 128, 185, 0.6)'] },
+            people: { solid: ['#1abc9c', '#16a085'], fill: ['rgba(26, 188, 156, 0.6)', 'rgba(22, 160, 133, 0.6)'] },
+            process: { solid: ['#e67e22', '#d35400'], fill: ['rgba(230, 126, 34, 0.6)', 'rgba(211, 84, 0, 0.6)'] }
         };
 
         // ===== CACHE MANAGEMENT =====
@@ -1484,27 +1667,30 @@
             const radius = node.level === 'primary' ? 50 : node.level === 'secondary' ? 40 : 30;
 
             // Get colors
-            const scheme = colorSchemes[node.colorGroup] || colorSchemes.blv;
-            const colors = node.level === 'primary' ? scheme.primary : scheme.secondary;
+            const scheme = colorSchemes[node.colorGroup] || colorSchemes.gold;
+            const fillColors = scheme.fill;
+            const solidColors = scheme.solid;
 
-            // Draw node circle with gradient
-            const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-            gradient.addColorStop(0, colors[0]);
-            gradient.addColorStop(1, colors[1]);
+            // Draw node circle with 60% transparent fill
+            const fillGradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            fillGradient.addColorStop(0, fillColors[0]);
+            fillGradient.addColorStop(1, fillColors[1]);
 
-            ctx.fillStyle = gradient;
+            ctx.fillStyle = fillGradient;
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Draw border if selected
-            if (state.selectedNode === node.id) {
-                ctx.strokeStyle = '#d4af37';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            }
+            // Draw 100% solid outline
+            const outlineGradient = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
+            outlineGradient.addColorStop(0, solidColors[0]);
+            outlineGradient.addColorStop(1, solidColors[1]);
 
-            // Draw label
+            ctx.strokeStyle = outlineGradient;
+            ctx.lineWidth = state.selectedNode === node.id ? 3 : 2;
+            ctx.stroke();
+
+            // Draw label in white
             ctx.fillStyle = '#ffffff';
             ctx.font = node.level === 'primary' ? 'bold 14px sans-serif' : '12px sans-serif';
             ctx.textAlign = 'center';
@@ -1841,6 +2027,7 @@
                 document.getElementById('nodeAvatarTag').value = node.avatarTag;
                 document.getElementById('nodeInternalTag').value = node.internalTag;
                 document.getElementById('nodeLevel').value = node.level;
+                document.getElementById('nodeColorGroup').value = node.colorGroup || 'gold';
                 document.getElementById('inspector').classList.add('open');
             }
         }
@@ -1955,10 +2142,58 @@
             return minDist;
         }
 
-        function showEdgeDeleteButton(edge, x, y) {
+        function showEdgeDeleteButton(edge, clickX, clickY) {
+            const nodesById = buildNodesById();
+            const sourceNode = nodesById[edge.source];
+            const targetNode = nodesById[edge.target];
+
+            if (!sourceNode || !targetNode) return;
+
+            const sourcePos = getNodePosition(sourceNode);
+            const targetPos = getNodePosition(targetNode);
+
+            const x1 = sourcePos.x + state.panOffset.x;
+            const y1 = sourcePos.y + state.panOffset.y;
+            const x2 = targetPos.x + state.panOffset.x;
+            const y2 = targetPos.y + state.panOffset.y;
+
+            // Get control point
+            let cpX, cpY;
+            const controlPoint = getEdgeControlPoint(edge);
+            if (controlPoint) {
+                cpX = controlPoint.x + state.panOffset.x;
+                cpY = controlPoint.y + state.panOffset.y;
+            } else {
+                cpX = (x1 + x2) / 2;
+                cpY = (y1 + y2) / 2 - 30;
+            }
+
+            // Find the closest point on the curve to the click
+            let closestT = 0;
+            let minDist = Infinity;
+            const steps = 20;
+
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const t1 = 1 - t;
+                const qx = t1 * t1 * x1 + 2 * t1 * t * cpX + t * t * x2;
+                const qy = t1 * t1 * y1 + 2 * t1 * t * cpY + t * t * y2;
+                const dist = Math.sqrt((clickX - qx) ** 2 + (clickY - qy) ** 2);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestT = t;
+                }
+            }
+
+            // Calculate point on curve at closestT
+            const t1 = 1 - closestT;
+            const curveX = t1 * t1 * x1 + 2 * t1 * closestT * cpX + closestT * closestT * x2;
+            const curveY = t1 * t1 * y1 + 2 * t1 * closestT * cpY + closestT * closestT * y2;
+
+            // Position button just off the edge (offset by 20px)
             const btn = document.getElementById('edgeDeleteBtn');
-            btn.style.left = x + 'px';
-            btn.style.top = y + 'px';
+            btn.style.left = (curveX + 20) + 'px';
+            btn.style.top = (curveY - 20) + 'px';
             btn.classList.add('show');
         }
 
@@ -2098,6 +2333,19 @@
                 const node = nodesById[state.selectedNode];
                 if (node) {
                     node.level = e.target.value;
+                    invalidateCache();
+                    debouncedSave();
+                    render();
+                }
+            }
+        });
+
+        document.getElementById('nodeColorGroup').addEventListener('change', (e) => {
+            if (state.selectedNode) {
+                const nodesById = buildNodesById();
+                const node = nodesById[state.selectedNode];
+                if (node) {
+                    node.colorGroup = e.target.value;
                     invalidateCache();
                     debouncedSave();
                     render();
@@ -2480,7 +2728,9 @@
             holdProgress: 0,
             holdType: null, // 'space' or 'enter'
             currentLine: null,
-            lineNotes: {} // { lineIndex: "notes content" }
+            lineNotes: {}, // { lineIndex: "notes content" }
+            layout: 'vertical', // 'vertical' or 'horizontal'
+            colorScheme: 'gold' // default color scheme
         };
 
         // Open/close text mode
@@ -2491,6 +2741,38 @@
 
         document.getElementById('closeTextModeBtn').addEventListener('click', () => {
             document.getElementById('textModeOverlay').classList.remove('open');
+        });
+
+        // Layout buttons
+        document.querySelectorAll('.layout-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                textModeState.layout = btn.dataset.layout;
+            });
+        });
+
+        // Color scheme dropdown
+        document.getElementById('textColorSchemeBtn').addEventListener('click', () => {
+            const dropdown = document.getElementById('textColorDropdown');
+            dropdown.classList.toggle('show');
+        });
+
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const color = option.dataset.color;
+                textModeState.colorScheme = color;
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                document.getElementById('textColorDropdown').classList.remove('show');
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.color-scheme-dropdown')) {
+                document.getElementById('textColorDropdown').classList.remove('show');
+            }
         });
 
         // Text editor keyboard handling
@@ -2708,6 +2990,9 @@
             const edges = [];
             const nodeStack = []; // Track parent nodes at each level
 
+            const layout = textModeState.layout;
+            const colorScheme = textModeState.colorScheme;
+
             let yOffset = 100;
             let xOffset = 200;
 
@@ -2719,19 +3004,28 @@
                 const label = line.trim();
 
                 // Determine node properties based on level
-                let nodeLevel, visibility, colorGroup;
+                let nodeLevel, visibility;
                 if (level === 0) {
                     nodeLevel = 'primary';
                     visibility = 'both';
-                    colorGroup = 'blv';
                 } else if (level === 1) {
                     nodeLevel = 'secondary';
                     visibility = 'both';
-                    colorGroup = 'brand';
                 } else {
                     nodeLevel = 'detail';
                     visibility = 'internal';
-                    colorGroup = 'people';
+                }
+
+                // Calculate position based on layout
+                let x, y;
+                if (layout === 'vertical') {
+                    // Vertical: first nodes on top, branching down
+                    x = xOffset + (level * 200);
+                    y = yOffset;
+                } else {
+                    // Horizontal: first node on left, going right
+                    x = xOffset;
+                    y = yOffset + (level * 100);
                 }
 
                 const node = {
@@ -2741,9 +3035,9 @@
                     visibility,
                     avatarTag: 'BLV',
                     internalTag: 'Offer',
-                    colorGroup,
-                    x: xOffset + (level * 200),
-                    y: yOffset,
+                    colorGroup: colorScheme,
+                    x,
+                    y,
                     notes: notes[index] || ''
                 };
 
@@ -2762,7 +3056,12 @@
                     });
                 }
 
-                yOffset += 80;
+                // Update offset based on layout
+                if (layout === 'vertical') {
+                    yOffset += 80;
+                } else {
+                    xOffset += 200;
+                }
             });
 
             return { nodes, edges };
